@@ -1,0 +1,73 @@
+---
+title: "Oil Price Volatility"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(RcppRoll)
+library(ggplot2)
+```
+
+http://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm
+
+or
+
+https://fred.stlouisfed.org/series/DCOILWTICO/downloaddata
+
+```{r}
+brent <- read_csv("Data/Brent_daily_spot.csv")
+wti <- read_csv("Data/WTI_daily_spot.csv")
+```
+
+```{r}
+window = 5
+wti.mave <- roll_mean(wti$wti, n = window)
+
+wti$MAVE <- c(rep(x = NA, times = window -1), wti.mave)
+
+ggplot(wti) + geom_point(aes(x = day, y = wti)) + geom_line(aes(x = day, y = MAVE), color = 'red')
+
+wti$AveDiff <- abs(wti$wti - wti$MAVE)
+
+ggplot(wti) + geom_point(aes(x = wti, y = AveDiff))
+
+model_1 <- lm(AveDiff ~ wti, data = wti)
+
+summary(model_1)
+
+```
+
+
+
+```{r}
+window = 5
+
+brent.mave <- roll_mean(brent$brent, n = window)
+
+brent$MAVE <- c(rep(x = NA, times = window -1), brent.mave)
+
+#ggplot(brent) + geom_point(aes(x = day, y = brent)) + geom_line(aes(x = day, y = MAVE), color = 'red')
+
+brent$AveDiff <- abs(brent$brent - brent$MAVE)
+
+ggplot(brent) + geom_point(aes(x = brent, y = AveDiff))
+
+model_2 <- lm(AveDiff ~ brent, data = brent)
+summary(model_2)
+
+ggplot(brent) + geom_density(aes(x = AveDiff))
+```
+
+
+#Differencing
+```{r}
+wti$Diff <- c(NA, diff(wti$wti))
+
+model.3 <- lm(Diff ~ wti, data = wti)
+summary(model.3)
+
+ggplot(wti, aes(x = wti, y = abs(Diff))) + geom_point() + geom_smooth()
+```
+
