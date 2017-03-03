@@ -31,7 +31,7 @@ ggplot(wti) + geom_point(aes(x = day, y = wti)) + geom_line(aes(x = day, y = MAV
 
 wti$AveDiff <- abs(wti$wti - wti$MAVE)
 
-ggplot(wti) + geom_point(aes(x = wti, y = AveDiff))
+ggplot(wti, aes(x = wti, y = AveDiff)) + geom_point() + geom_smooth()
 
 model_1 <- lm(AveDiff ~ wti, data = wti)
 
@@ -52,7 +52,7 @@ brent$MAVE <- c(rep(x = NA, times = window -1), brent.mave)
 
 brent$AveDiff <- abs(brent$brent - brent$MAVE)
 
-ggplot(brent) + geom_point(aes(x = brent, y = AveDiff))
+ggplot(brent, aes(x = brent, y = AveDiff)) + geom_point() + geom_smooth()
 
 model_2 <- lm(AveDiff ~ brent, data = brent)
 summary(model_2)
