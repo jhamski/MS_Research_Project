@@ -1,0 +1,32 @@
+---
+output: 
+  pdf_document:
+    citation_package: natbib
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm-latex-ms.tex
+title: "Oil Price Volatility"
+author:
+- name: James P. Hamski
+  affiliation: City University of New York
+abstract: "Oil price volatility ..."
+keywords: "oil price, commodities, time series analysis, variance clustering"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+# spacing: double
+bibliography: master.bib
+biblio-style: apsr
+---
+
+# Introduction
+
+Crude oil is the world's largest traded commodity by dollar, amounting to x% of world commodities market. High oil price volatility (i.e. variance of the spot price over time) is a high-profile financial event, with broad reporting in the general media.
+
+This research project is a characteristic study of oil price volatility and time series analysis. 
+
+# The Oil Trading System and Spot Market
+
+# 
