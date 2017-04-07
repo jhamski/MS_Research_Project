@@ -1,0 +1,73 @@
+ ---
+title: "Oil Price Volatility"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(RcppRoll)
+library(ggplot2)
+library(TSA)
+```
+
+http://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm
+
+or
+
+https://fred.stlouisfed.org/series/DCOILWTICO/downloaddata
+
+```{r}
+brent <- read_csv("Data/Brent_daily_spot.csv")
+wti <- read_csv("Data/WTI_daily_spot.csv")
+```
+
+```{r}
+window = 5
+wti.mave <- roll_mean(wti$wti, n = window)
+
+wti$MAVE <- c(rep(x = NA, times = window -1), wti.mave)
+
+ggplot(wti) + geom_point(aes(x = day, y = wti)) + geom_line(aes(x = day, y = MAVE), color = 'red')
+
+wti$AveDiff <- abs(wti$wti - wti$MAVE)
+```
+
+```{r, warning=FALSE}
+wti.return <- wti$wti %>% log() %>% diff() #%>% multiply_by(100) 
+wti.return.rec <- c(NA, wti.return)
+
+wti <- cbind(wti, wti.return.rec )
+
+ggplot(wti, aes(x = day, y = wti.return.rec )) + geom_line() + geom_abline(intercept = 0, slope = 0, color = "red")
+```
+
+ARIMA Diagnostics
+
+```{r}
+mean(wti.return)
+sd(wti.return)/sqrt(length(wti.return))
+```
+```{r}
+acf(wti.return)
+pacf(wti.return)
+```
+
+```{r}
+eacf(wti.return)
+```
+```{r}
+McLeod.Li.test(y=wti.return)
+```
+```{r}
+qqnorm(wti.return)
+qqline(wti.return)
+```
+
+```{r}
+ggplot(wti, aes(x = wti.return)) + geom_density() + stat_function(fun = dnorm, colour = "red", args = list(mean = mean(wti.return), sd = sd(wti.return)))
+```
+
+# The ARCH(1) Model
+Autoregressive conditional heteroscedasticity (ARCH) model proposed by Engle (1982) for the changing variance of a time series. 
+
