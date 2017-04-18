@@ -68,6 +68,5 @@ qqline(wti.return)
 ggplot(wti, aes(x = wti.return)) + geom_density() + stat_function(fun = dnorm, colour = "red", args = list(mean = mean(wti.return), sd = sd(wti.return)))
 ```
 
-# The ARCH(1) Model
-Autoregressive conditional heteroscedasticity (ARCH) model proposed by Engle (1982) for the changing variance of a time series. 
+ 
 

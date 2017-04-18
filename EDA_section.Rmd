@@ -1,0 +1,51 @@
+---
+title: "Exploratory Data Analysis"
+author: "J. Hamski"
+date: "4/15/2017"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(RcppRoll)
+library(ggplot2)
+library(xts)
+library(ggfortify)
+```
+
+```{r, message=FALSE}
+#brent <- read_csv("Data/Brent_daily_spot.csv")
+wti <- read_csv("Data/WTI_daily_spot.csv")
+```
+
+```{r}
+wti.xts <- xts(wti$wti, as.Date(wti$day, format='%Y-%m-%d'))
+wti.return <- wti.xts %>% log() %>% diff() #%>% raise_to_power(2)
+
+wti.xts <- wti.xts[-1]
+wti.return <- wti.return[-1]
+```
+
+First, show daily close timeseries and the returns series. 
+```{r}
+autoplot(wti.xts)
+autoplot(wti.return)
+```
+
+
+Oil Price vs. Volatility 
+
+```{r}
+wti.combined <- cbind.xts(wti.xts, wti.return) 
+colnames(wti.combined)<- c("close", "return")
+
+cov(wti.xts, wti.return)
+ggplot(wti.combined, aes(x = close, y = abs(return))) + geom_point() + geom_smooth()
+```
+```{r}
+acf(wti.return, lag.max = 50)
+```
+
+
+

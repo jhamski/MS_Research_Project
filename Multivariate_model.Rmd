@@ -1,0 +1,12 @@
+---
+title: "Multivariate Model"
+author: "J. Hamski"
+date: "4/17/2017"
+output: html_document
+---
+
+```{r}
+library(rmgarch)
+library(parallel)
+```
+

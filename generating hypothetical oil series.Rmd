@@ -1,0 +1,22 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(magrittr)
+library(TSA)
+library(tseries)
+```
+
+Goal: Simulated Timeseries of what a price-dependent volatility clustering. 
+```{r}
+set.seed(5646)
+len <- 500
+
+sim.1 <- garch.sim(alpha = c(200, 0.9), n = len)
+
+plot(cumsum(sim.1), type = "l")
+plot(sim.1, type = "l")
+```
+

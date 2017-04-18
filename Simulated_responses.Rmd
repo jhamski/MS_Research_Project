@@ -1,0 +1,51 @@
+---
+title: "Simulated responses"
+author: "J. Hamski"
+date: "4/16/2017"
+output: html_document
+---
+
+```{r}
+library(rgl)
+library(rugarch)
+```
+
+Simulating a GARCH
+```{r}
+# create a spec
+spec.1 <- ugarchspec(
+  variance.model = list(model="sGARCH", garchOrder=c(1,1)), 
+  mean.model = list(armaOrder=c(0,0), include.mean=TRUE, 
+                    garchInMean = FALSE, inMeanType = 2), distribution.model = "sstd", 
+  fixed.pars = list(mu=0.001,omega=0.00001, alpha1=0.05, beta1=0.90, shape=4,skew=2))
+
+#show(spec.1)
+# simulate using ugarchpath
+
+sim.1 <- ugarchpath(spec = spec.1, n.sim = 500)
+plot(sim.1)
+```
+
+
+
+# Fitting a Model
+
+```{r}
+spec <- ugarchspec(variance.model = list(model = "sGARCH", 
+                                         garchOrder = c(1, 1), 
+                                         submodel = NULL, 
+                                         external.regressors = NULL, 
+                                         variance.targeting = FALSE), 
+
+                   mean.model     = list(armaOrder = c(1, 1), 
+                                         external.regressors = NULL, 
+                                         distribution.model = "norm", 
+                                         start.pars = list(), 
+                                         fixed.pars = list()))
+
+garch <- ugarchfit(spec = spec, data = wti.xts, solver.control = list(trace=0))
+```
+```{r}
+garch
+```
+
