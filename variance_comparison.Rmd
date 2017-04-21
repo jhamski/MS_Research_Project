@@ -1,0 +1,30 @@
+---
+title: "Variance comparison"
+author: "J. Hamski"
+date: "4/20/2017"
+output: html_document
+---
+
+```{r}
+library(changepoint)
+library(zoo)
+library(tseries)
+```
+
+
+
+```{r}
+
+wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y')) %>%
+  as.ts() %>%
+  na.remove()
+```
+
+```{r}
+cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000)
+length(cpt.1@cpts)
+plot(cpt.1)
+```
+
+
+

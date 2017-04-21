@@ -27,14 +27,20 @@ wti.xts <- wti.xts[-1]
 wti.return <- wti.return[-1]
 ```
 
-First, show daily close timeseries and the returns series. 
+Historical vs Implied Volatility
+
+
+
+
+Daily returns
+
 ```{r}
 autoplot(wti.xts)
 autoplot(wti.return)
 ```
 
 
-Oil Price vs. Volatility 
+Oil Price vs. Daily Returns 
 
 ```{r}
 wti.combined <- cbind.xts(wti.xts, wti.return) 
@@ -43,9 +49,20 @@ colnames(wti.combined)<- c("close", "return")
 cov(wti.xts, wti.return)
 ggplot(wti.combined, aes(x = close, y = abs(return))) + geom_point() + geom_smooth()
 ```
+
 ```{r}
 acf(wti.return, lag.max = 50)
 ```
 
 
+5-Day Rolling Realized Volatility
+
+
+
+30-Day Rolling Realized Volatility
+
+
+```{r}
+decompose(wti.xts, )
+```
 
