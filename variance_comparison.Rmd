@@ -21,7 +21,7 @@ wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y'
 ```
 
 ```{r}
-cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000)
+cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, minseglen = 250)
 length(cpt.1@cpts)
 plot(cpt.1)
 ```
