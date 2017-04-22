@@ -26,5 +26,29 @@ length(cpt.1@cpts)
 plot(cpt.1)
 ```
 
+```{r}
+regimes <- cpt.1@cpts
+regime.index <- NULL
+
+for (i in 1:length(regimes)){
+  ifelse(i == 1, 
+         regime.index.iter <- rep.int(i, times = length(1:regimes[i])), 
+         regime.index.iter <- rep.int(i, times = length((regimes[i-1]+1):regimes[i])))
+  regime.index <- c(regime.index, regime.index.iter)
+}
+
+wti.regimes <- cbind(wti.ts, regime.index) %>% as.data.frame()
+colnames(wti.regimes) <- c("close", "regime")
+wti.regimes$regime <- as.factor(wti.regimes$regime)
+```
+
+```{r}
+price.regime.descriptive <- wti.regimes %>%
+  group_by(regime) %>% 
+  summarize(ave = mean(close), var = var(close))
+
+plot(x = price.regime.descriptive$ave, y = price.regime.descriptive$var, type = "p")
+summary(lm(var ~ ave, data = price.regime.descriptive))
+```
 
 
