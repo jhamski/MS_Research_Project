@@ -9,6 +9,8 @@ output: html_document
 library(changepoint)
 library(zoo)
 library(tseries)
+
+load("wti_project.Rda")
 ```
 
 

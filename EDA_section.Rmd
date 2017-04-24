@@ -27,6 +27,11 @@ wti.xts <- wti.xts[-1]
 wti.return <- wti.return[-1]
 ```
 
+```{r}
+wti.project <- save(wti, wti.return, wti.xts, file = "wti_project.Rda")
+```
+
+
 Historical vs Implied Volatility
 
 
