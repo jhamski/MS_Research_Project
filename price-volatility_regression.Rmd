@@ -1,0 +1,46 @@
+---
+title: "Price-volatility Regression Model"
+author: "J. Hamski"
+date: "4/30/2017"
+output: html_document
+---
+
+```{r}
+load("wti_project.Rda")
+```
+
+Take absolute value of returns
+```{r}
+wti.combined$return <- abs(wti.combined$return)
+```
+
+
+
+
+Linear Regression
+```{r}
+returns.lm <- lm(return ~ close, data = wti.combined)
+TD.lm <- lm(`30-day` ~ close, data = wti.combined)
+FD.lm <- lm(`5-day` ~ close, data = wti.combined)
+```
+
+```{r}
+summary(returns.lm)
+summary(TD.lm)
+summary(FD.lm)
+```
+
+```{r}
+wti.df <- as.data.frame(wti.combined)
+plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm)
+plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm)
+plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm)
+```
+
+However, residual analysis shows that linear regression is not an appropriate method for modeling the relationship between returns and price level. 
+```{r} 
+plot(returns.lm)
+plot(TD.lm)
+plot(FD.lm)
+```
+

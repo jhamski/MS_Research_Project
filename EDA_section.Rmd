@@ -12,29 +12,66 @@ library(RcppRoll)
 library(ggplot2)
 library(xts)
 library(ggfortify)
+library(PerformanceAnalytics)
+library(quantmod)
 ```
+
 
 ```{r, message=FALSE}
 #brent <- read_csv("Data/Brent_daily_spot.csv")
 wti <- read_csv("Data/WTI_daily_spot.csv")
+#load("wti_project.Rda")
 ```
 
 ```{r}
-wti.xts <- xts(wti$wti, as.Date(wti$day, format='%Y-%m-%d'))
+wti.xts <- xts(wti$wti, as.Date(wti$day, format='%m/%d/%y'))
 wti.return <- wti.xts %>% log() %>% diff() #%>% raise_to_power(2)
+
+wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y')) %>%
+  as.ts() %>%
+  na.remove()
+
+vol.1 <- sd.annualized(wti.return, scale = 252)
+vol.5 <- sd.annualized(wti.return, scale = 50)
+vol.30 <- sd.annualized(wti.return, scale = 12)
+
 
 wti.xts <- wti.xts[-1]
 wti.return <- wti.return[-1]
+
+
+```
+
+
+```{r}
+vols.30 <- apply(wti.xts, 2, function(x) {
+    #use rolling 30 day window to calculate standard deviation.
+    #annualize by multiplying by square root of time
+  wti.xts %>% log() %>% runSD(n=30) * sqrt(252)
+})
 ```
 
 ```{r}
-wti.project <- save(wti, wti.return, wti.xts, file = "wti_project.Rda")
+vols.5 <- apply(wti.xts, 2, function(x) {
+    #use rolling 30 day window to calculate standard deviation.
+    #annualize by multiplying by square root of time
+  wti.xts %>% log() %>% runSD(n=5) * sqrt(252)
+})
+```
+
+```{r}
+wti.combined <- cbind.xts(wti.xts, wti.return, vols.30, vols.5) %>% na.omit()
+colnames(wti.combined)<- c("close", "return", "30-day", "5-day")
 ```
 
 
-Historical vs Implied Volatility
+```{r}
+#save(wti, wti.return, wti.xts, wti.ts, wti.combined, file = "wti_project.Rda")
+```
 
-
+```{r}
+summary(wti.xts)
+```
 
 
 Daily returns
@@ -42,32 +79,13 @@ Daily returns
 ```{r}
 autoplot(wti.xts)
 autoplot(wti.return)
+autoplot(wti.combined$`30-day`)
+autoplot(wti.combined$`5-day`)
 ```
 
 
-Oil Price vs. Daily Returns 
-
-```{r}
-wti.combined <- cbind.xts(wti.xts, wti.return) 
-colnames(wti.combined)<- c("close", "return")
-
-cov(wti.xts, wti.return)
-ggplot(wti.combined, aes(x = close, y = abs(return))) + geom_point() + geom_smooth()
-```
+Times series exploration 
 
 ```{r}
 acf(wti.return, lag.max = 50)
 ```
-
-
-5-Day Rolling Realized Volatility
-
-
-
-30-Day Rolling Realized Volatility
-
-
-```{r}
-decompose(wti.xts, )
-```
-
