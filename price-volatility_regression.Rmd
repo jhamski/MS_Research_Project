@@ -6,14 +6,29 @@ output: html_document
 ---
 
 ```{r}
+library(knitr)
+```
+
+```{r}
 load("wti_project.Rda")
 ```
+
 
 Take absolute value of returns
 ```{r}
 wti.combined$return <- abs(wti.combined$return)
+wti.df <- as.data.frame(wti.combined)
 ```
 
+```{r}
+cov.results <- cov(wti.df)[1,2:4]
+
+cor.results <- cor(wti.df)[1,2:4]
+
+cov.cor <- cbind(cov.results, cor.results)
+colnames(cov.cor) <- c("Covariance", "Correlation")
+kable(cov.cor)
+```
 
 
 
@@ -31,7 +46,6 @@ summary(FD.lm)
 ```
 
 ```{r}
-wti.df <- as.data.frame(wti.combined)
 plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm)
 plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm)
 plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm)
@@ -44,3 +58,25 @@ plot(TD.lm)
 plot(FD.lm)
 ```
 
+```{r}
+cutoff.30 <- quantile(wti.df$`30-day`, probs = 0.90)
+
+wti.df.30high <- wti.df %>% filter(`30-day` >= cutoff.30) 
+
+TD.lm.high <- lm(`30-day` ~ close, data = wti.df.30high)
+plot(x = wti.df.30high$close, y = wti.df.30high$`30-day`) + abline(TD.lm.high)
+```
+
+```{r}
+summary(wti.df$`30-day`)
+```
+
+```{r}
+cutoff.30 <- quantile(wti.df$`30-day`, probs = 0.90)
+
+wti.df.30high <- wti.df %>% filter(`30-day` >= cutoff.30) 
+
+TD.lm.high <- lm(`30-day` ~ close, data = wti.df.30high)
+plot(x = wti.df.30high$close, y = wti.df.30high$`30-day`) + abline(TD.lm.high)
+
+```

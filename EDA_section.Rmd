@@ -14,6 +14,7 @@ library(xts)
 library(ggfortify)
 library(PerformanceAnalytics)
 library(quantmod)
+library(magrittr)
 ```
 
 
@@ -24,13 +25,28 @@ wti <- read_csv("Data/WTI_daily_spot.csv")
 ```
 
 ```{r}
+# create xts object
 wti.xts <- xts(wti$wti, as.Date(wti$day, format='%m/%d/%y'))
-wti.return <- wti.xts %>% log() %>% diff() #%>% raise_to_power(2)
 
+#filter with these dates:
+#start.date = as.POSIXct("1998-01-01")
+#end.date = as.POSIXct("2015-01-01")
+
+# By using an index that is the logical AND of two vectors
+#wti.xts <- wti.xts[paste(start.date,end.date,sep="::")]
+```
+
+
+```{r}
+# calculate returns
+wti.return <- wti.xts %>% log() %>% diff(lag = 1) #%>% exp() %>% subtract(1)
+
+# create ts object
 wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y')) %>%
   as.ts() %>%
   na.remove()
 
+#calculate whole-period annualized volatilities
 vol.1 <- sd.annualized(wti.return, scale = 252)
 vol.5 <- sd.annualized(wti.return, scale = 50)
 vol.30 <- sd.annualized(wti.return, scale = 12)
@@ -44,18 +60,18 @@ wti.return <- wti.return[-1]
 
 
 ```{r}
-vols.30 <- apply(wti.xts, 2, function(x) {
+vols.30 <- apply(wti.return , 2, function(x) {
     #use rolling 30 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.xts %>% log() %>% runSD(n=30) * sqrt(252)
+  wti.return %>% runSD(n=30) * sqrt(252)
 })
 ```
 
 ```{r}
-vols.5 <- apply(wti.xts, 2, function(x) {
-    #use rolling 30 day window to calculate standard deviation.
+vols.5 <- apply(wti.return, 2, function(x) {
+    #use rolling 5 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.xts %>% log() %>% runSD(n=5) * sqrt(252)
+  wti.return %>% runSD(n=5) * sqrt(252)
 })
 ```
 
@@ -65,8 +81,10 @@ colnames(wti.combined)<- c("close", "return", "30-day", "5-day")
 ```
 
 
+
+
 ```{r}
-#save(wti, wti.return, wti.xts, wti.ts, wti.combined, file = "wti_project.Rda")
+save(wti, wti.return, wti.xts, wti.ts, wti.combined, file = "wti_project.Rda")
 ```
 
 ```{r}

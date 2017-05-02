@@ -17,14 +17,6 @@ load("wti_project.Rda")
 ```
 
 
-
-```{r}
-
-wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y')) %>%
-  as.ts() %>%
-  na.remove()
-```
-
 ```{r}
 cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, minseglen = 250)
 
@@ -53,20 +45,42 @@ wti.regimes$regime <- as.factor(wti.regimes$regime)
 ```{r}
 price.regime.descriptive <- wti.regimes %>%
   group_by(regime) %>% 
-  summarize(ave = mean(close), var = var(close))
+  summarize(med = median(close), var = var(close))
 
-plot(x = price.regime.descriptive$ave, y = price.regime.descriptive$var, type = "p")
-summary(lm(var ~ ave, data = price.regime.descriptive))
+plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p")
+summary(lm(var ~ med, data = price.regime.descriptive))
 kable(price.regime.descriptive)
 ```
 
 ```{r}
 ggplot(wti.regimes, aes(sample = close)) + stat_qq() + facet_grid(regime ~ .)
-ggplot(wti.regimes, aes(x = regime, y = close)) + geom_violin() #+ geom_boxplot() 
+ggplot(wti.regimes, aes(x = regime, y = close)) + geom_violin(draw_quantiles = 0.5) #+ geom_boxplot() 
 ```
+
 https://en.wikipedia.org/wiki/F-test_of_equality_of_variances
 
+```{r}
 
+wti.regimes.ret <-  cbind(wti.regimes[31:nrow(wti.regimes),], wti.df$return) 
+colnames(wti.regimes.ret) <- c("close", "regime", "returns")
 
+barlets.test.price <- bartlett.test(x = wti.regimes$close, g = wti.regimes$regime)
+barlets.test.price
+
+barlets.test.return <- bartlett.test(x = wti.regimes.ret$returns, g = wti.regimes.ret$regime, na.action =  na.omit)
+barlets.test.return
+```
+The Fligner Killeen test is a non-parametric test for homogeneity of group variances. This test indicates that the variances are indeed different scross the 9 regimes. 
+
+```{r}
+fligner.test(x = wti.regimes$close, g = wti.regimes$regime)
+
+fligner.test(x = wti.regimes.ret$returns, g = wti.regimes.ret$regime, na.action =  na.omit)
+```
+
+```{r}
+ggplot(wti.regimes.ret, aes(sample = returns)) + stat_qq() + facet_grid(regime ~ .)
+ggplot(wti.regimes.ret, aes(x = regime, y = returns)) + geom_violin(draw_quantiles = 0.5) #+ geom_boxplot() 
+```
 
 
