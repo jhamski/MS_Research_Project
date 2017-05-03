@@ -2,7 +2,9 @@
 title: "Price-volatility Regression Model"
 author: "J. Hamski"
 date: "4/30/2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r}
@@ -11,13 +13,6 @@ library(knitr)
 
 ```{r}
 load("wti_project.Rda")
-```
-
-
-Take absolute value of returns
-```{r}
-wti.combined$return <- abs(wti.combined$return)
-wti.df <- as.data.frame(wti.combined)
 ```
 
 ```{r}
