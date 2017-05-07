@@ -10,6 +10,7 @@ library(quantmod)
 library(RcppRoll)
 library(readr)
 library(tseries)
+library(PerformanceAnalytics)
 ```
 
 
@@ -66,16 +67,8 @@ wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y'
   as.ts() %>%
   na.remove()
 
-#calculate whole-period annualized volatilities
-vol.1 <- sd.annualized(wti.return, scale = 252)
-vol.5 <- sd.annualized(wti.return, scale = 50)
-vol.30 <- sd.annualized(wti.return, scale = 12)
-
-
 wti.xts <- wti.xts[-1]
 wti.return <- wti.return[-1]
-
-
 ```
 
 
@@ -83,7 +76,7 @@ wti.return <- wti.return[-1]
 vols.30 <- apply(wti.return , 2, function(x) {
     #use rolling 30 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.return %>% runSD(n=30) * sqrt(252)
+  wti.return %>% runSD(n=30) * sqrt(252/12)
 })
 ```
 
@@ -91,7 +84,7 @@ vols.30 <- apply(wti.return , 2, function(x) {
 vols.5 <- apply(wti.return, 2, function(x) {
     #use rolling 5 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.return %>% runSD(n=5) * sqrt(252)
+  wti.return %>% runSD(n=5) * sqrt(252/5)
 })
 ```
 
@@ -109,4 +102,7 @@ wti.df <- as.data.frame(wti.combined)
 
 ```{r}
 save(wti, wti.return, wti.xts, wti.ts, wti.combined, wti.df, file = "wti_project.Rda")
+save(wti, wti.return, wti.xts, wti.ts, wti.combined, wti.df, file = "Manuscript/wti_project.Rda")
+save(wti, wti.return, wti.xts, wti.ts, wti.combined, wti.df, file = "ShinyApp/OilVolatility/wti_project.Rda")
+
 ```

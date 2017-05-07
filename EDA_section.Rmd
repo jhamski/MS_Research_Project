@@ -24,7 +24,7 @@ load("wti_project.Rda")
 
 # Exploratory Data Analysis
 ## Data Source
-The data sources used were the West Texas Intermediate (WTI) and Brent nominal (i.e. not inflation adjusted) daily spot price record from the U.S. Energy Information Administration. The WTI series was used from January 2, 1986 through December 30, 2016, the Brent series from May 20 1987 through December 30, 2016. 
+The data source is the West Texas Intermediate (WTI) nominal (i.e. not inflation adjusted) daily spot price record from the U.S. Energy Information Administration. The WTI series was filtered to the date range January 2, 1986 through December 30, 2016. 
 ```{r}
 summary(wti.xts) #%>% tidy()
 ```
@@ -33,11 +33,14 @@ summary(wti.xts) #%>% tidy()
 ## Returns and Volatility
 A challenge in analyzing financial time series in general, and spot oil market prices specifically, is that the variance structure may be independent, but not identically distributed. Oil prices exhibit periods of low volatility (i.e. relatively constant prices) and periods of high volatility (i.e. changing prices). This is referred to as volatility clustering. This violates the assumption in the most frequently used time series model, the autoregressive integrated moving average (ARIMA) model.  
 
-In this research paper, volatility is characterized two ways: (1) 5-day historic volatility and (2) 30-day historic volatility. In addition, the relationship between the returns themselves and price level is investigated. 
+In this research paper, volatility is characterized two ways: (1) 5-day historic volatility and (2) 30-day historic volatility. In addition, the relationship between the returns themselves and price level is investigated. Single-period returns were calculated as: 
+$R_t = \frac{P_t-P_{t-1}}{P_{t-1}}$
+and in some sections, their absolute values are used. 
 
 ```{r}
 par(mfrow = c(2, 2))
-plot.xts(wti.xts, type = "l")
+plot.xts(wti.xts, type = "l", ylab = "Nominal Dollars ($)")
+
 plot.xts(wti.return, type = "l")
 plot.xts(wti.combined[,3], type = "l")
 plot.xts(wti.combined[,4], type = "l")

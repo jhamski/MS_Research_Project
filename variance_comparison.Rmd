@@ -19,6 +19,8 @@ load("wti_project.Rda")
 ```
 
 
+
+
 ```{r}
 cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, minseglen = 250)
 
