@@ -22,7 +22,7 @@ cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, m
 
 #cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "SIC", minseglen = 250)
 
-length(cpt.1@cpts)
+#length(cpt.1@cpts)
 plot(cpt.1)
 ```
 

@@ -38,3 +38,23 @@ garchdccfit
 plot(garchdccfit)
 ```
 
+```{r}
+wti.grch.1 <- wti.combined[,c(1,3)]
+
+spec <- ugarchspec(mean.model=list(armaOrder=c(1,1)), variance.model =list(model = "sGARCH"), distribution="std") 
+
+# dcc specification - GARCH(1,1) for conditional correlations
+c.spec = cgarchspec(uspec = multispec(replicate(2, spec)), VAR = TRUE, lag = 1, lag.max = 4, lag.criterion = c("AIC", "HQ", "SC", "FPE"), external.regressors = NULL, dccOrder = c(1,1), distribution.model = list(copula = c("mvt"), method = c("ML"), time.varying = FALSE, transformation = "parametric"), start.pars = list(), fixed.pars = list())	
+
+fit1 = cgarchfit(c.spec, data = wti.grch.1 , spd.control = list(lower = 0.1, upper = 0.9, type = "pwm", 
+kernel = "epanech"), fit.control = list(eval.se = TRUE, trace = TRUE), solver = "solnp")
+
+fit1
+```
+
+```{r}
+plot(fit1)
+```
+
+
+

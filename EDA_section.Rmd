@@ -2,7 +2,9 @@
 title: "Exploratory Data Analysis"
 author: "J. Hamski"
 date: "4/15/2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r, message=FALSE, warning=FALSE}
@@ -10,29 +12,49 @@ library(dplyr)
 library(ggplot2)
 library(ggfortify)
 library(magrittr)
+library(xts)
+library(broom)
+library(TSA)
 ```
 
 ```{r}
 load("wti_project.Rda")
 ```
 
+
+# Exploratory Data Analysis
+## Data Source
+The data sources used were the West Texas Intermediate (WTI) and Brent nominal (i.e. not inflation adjusted) daily spot price record from the U.S. Energy Information Administration. The WTI series was used from January 2, 1986 through December 30, 2016, the Brent series from May 20 1987 through December 30, 2016. 
 ```{r}
-summary(wti.xts)
+summary(wti.xts) #%>% tidy()
 ```
 
 
-Daily returns
+## Returns and Volatility
+A challenge in analyzing financial time series in general, and spot oil market prices specifically, is that the variance structure may be independent, but not identically distributed. Oil prices exhibit periods of low volatility (i.e. relatively constant prices) and periods of high volatility (i.e. changing prices). This is referred to as volatility clustering. This violates the assumption in the most frequently used time series model, the autoregressive integrated moving average (ARIMA) model.  
+
+In this research paper, volatility is characterized two ways: (1) 5-day historic volatility and (2) 30-day historic volatility. In addition, the relationship between the returns themselves and price level is investigated. 
 
 ```{r}
-autoplot(wti.xts)
-autoplot(wti.return)
-autoplot(wti.combined$`30-day`)
-autoplot(wti.combined$`5-day`)
+par(mfrow = c(2, 2))
+plot.xts(wti.xts, type = "l")
+plot.xts(wti.return, type = "l")
+plot.xts(wti.combined[,3], type = "l")
+plot.xts(wti.combined[,4], type = "l")
 ```
 
 
 Times series exploration 
 
 ```{r}
-acf(wti.return, lag.max = 50)
+par(mfrow = c(1, 2))
+acf(abs(wti.return), lag.max = 50)
+pacf(abs(wti.return), lag.max = 50)
+               
 ```
+```{r}
+
+McLeod.Li.test(y = wti.return %>% abs())
+
+```
+
