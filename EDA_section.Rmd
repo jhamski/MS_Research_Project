@@ -54,7 +54,7 @@ pacf(abs(wti.return), lag.max = 50)
 ```
 ```{r}
 
-McLeod.Li.test(y = wti.return %>% abs())
+McLeod.Li.test(y = wti.return)
 
 ```
 

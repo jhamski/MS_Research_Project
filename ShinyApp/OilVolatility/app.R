@@ -9,25 +9,35 @@
 
 library(shiny)
 
+library(changepoint)
+
+load("wti_project.Rda")
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
    # Application title
-   titlePanel("Old Faithful Geyser Data"),
+   titlePanel("Changepoint Parameterization of Oil Price Regimes"),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
+         sliderInput("minseg",
+                     "Minimum Number of Bins:",
+                     min = 30,
+                     max = 1000,
+                     value = 250),
+         
+         sliderInput("penalty",
+                     "PELT Penalty:",
+                     min = 0,
+                     max = 10000,
+                     value = 10000)
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+         plotOutput("Plot")
       )
    )
 )
@@ -43,6 +53,17 @@ server <- function(input, output) {
       # draw the histogram with the specified number of bins
       hist(x, breaks = bins, col = 'darkgray', border = 'white')
    })
+   
+   output$Plot <- renderPlot({
+     cpt <- cpt.mean(wti.ts, 
+                     method="PELT", 
+                     penalty = "Manual", 
+                     pen.value = input$penalty, 
+                     minseglen = input$minseg)
+     
+     plot(cpt, , cpt.width = 5)
+   })
+   
 }
 
 # Run the application 
