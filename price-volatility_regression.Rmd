@@ -17,7 +17,6 @@ load("wti_project.Rda")
 
 ```{r}
 cov.results <- cov(wti.df)[1,2:4]
-
 cor.results <- cor(wti.df)[1,2:4]
 
 cov.cor <- cbind(cov.results, cor.results)
@@ -32,15 +31,7 @@ Linear Regression
 returns.lm <- lm(return ~ close, data = wti.combined)
 TD.lm <- lm(`30-day` ~ close, data = wti.combined)
 FD.lm <- lm(`5-day` ~ close, data = wti.combined)
-```
 
-```{r}
-summary(returns.lm)
-summary(TD.lm)
-summary(FD.lm)
-```
-
-```{r}
 plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm)
 plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm)
 plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm)
@@ -54,17 +45,30 @@ plot(FD.lm)
 ```
 
 ```{r}
-cutoff.30 <- quantile(wti.df$`30-day`, probs = 0.90)
+wti.xts.recent <- wti.xts[paste("1998-01-01", "2016-12-31",sep="::")]
+hist(wti.xts.recent)
+```
 
-wti.df.30high <- wti.df %>% filter(`30-day` >= cutoff.30) 
+```{r}
+wti.df.recent <- slice(wti.df, 3019:nrow(wti.df))
+
+cov.results.r <- cov(wti.df.recent)[1,2:4]
+cor.results.r <- cor(wti.df.recent)[1,2:4]
+
+cov.cor.r <- cbind(cov.results.r, cor.results.r)
+colnames(cov.cor.r) <- c("Covariance", "Correlation")
+kable(cov.cor.r)
+```
+
+```{r}
+cutoff.30 <- quantile(wti.df.recent$`30-day`, probs = 0.90)
+
+wti.df.30high <- wti.df.recent %>% filter(`30-day` >= cutoff.30) 
 
 TD.lm.high <- lm(`30-day` ~ close, data = wti.df.30high)
 plot(x = wti.df.30high$close, y = wti.df.30high$`30-day`) + abline(TD.lm.high)
 ```
 
-```{r}
-summary(wti.df$`30-day`)
-```
 
 ```{r}
 cutoff.30 <- quantile(wti.df$`30-day`, probs = 0.90)

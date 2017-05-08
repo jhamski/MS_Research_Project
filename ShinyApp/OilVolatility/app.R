@@ -22,16 +22,20 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
+        dateRangeInput('dateRange',
+                       label = 'Date range input: yyyy-mm-dd',
+                       start = "1986-01-02", end = "2016-12-30"),
+        
          sliderInput("minseg",
-                     "Minimum Number of Bins:",
+                     "Minimum Number of Days in Regime:",
                      min = 30,
-                     max = 1000,
+                     max = 750,
                      value = 250),
          
          sliderInput("penalty",
                      "PELT Penalty:",
                      min = 0,
-                     max = 10000,
+                     max = 20000,
                      value = 10000)
       ),
       
@@ -45,23 +49,21 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+
    
    output$Plot <- renderPlot({
-     cpt <- cpt.mean(wti.ts, 
+     start = as.POSIXct(input$dateRange[1])
+     end = as.POSIXct(input$dateRange[2])
+     
+     wti.ts.range <- wti.xts[paste(start, end, sep="::")] %>% as.ts()
+     
+     cpt <- cpt.mean(wti.ts.range, 
                      method="PELT", 
                      penalty = "Manual", 
                      pen.value = input$penalty, 
                      minseglen = input$minseg)
      
-     plot(cpt, , cpt.width = 5)
+     plot(cpt, cpt.width = 5)
    })
    
 }

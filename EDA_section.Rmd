@@ -39,21 +39,37 @@ and in some sections, their absolute values are used.
 
 ```{r}
 par(mfrow = c(2, 2))
-plot.xts(wti.xts, type = "l", ylab = "Nominal Dollars ($)")
-
-plot.xts(wti.return, type = "l")
-plot.xts(wti.combined[,3], type = "l")
-plot.xts(wti.combined[,4], type = "l")
+plot.xts(wti.xts, type = "l", ylab = "Nominal Dollars ($)", main = "WTI Price Series")
+plot.xts(wti.return, type = "l", main = "WTI Return Series")
+plot.xts(wti.combined[,3], type = "l", main = "WTI 30-day Historic Volatility")
+plot.xts(wti.combined[,4], type = "l", main = "WTI 5-day Historic Volatility")
 ```
 
 
 Times series exploration 
 
 ```{r}
+plot(wti.ts,type="l")
+tui.1 <- stats::filter(wti.ts,filter=rep(1/5,5))
+tui.2 <- stats::filter(wti.ts,filter=rep(1/25,25))
+tui.3 <- stats::filter(wti.ts,filter=rep(1/81,81))
+lines(tui.1,col="red")
+lines(tui.2,col="purple")
+lines(tui.3,col="blue")
+
+```
+```{r}
 par(mfrow = c(1, 2))
-acf(abs(wti.return), lag.max = 50)
+acf(abs(wti.ts), lag.max = 2000)
+pacf(abs(wti.ts), lag.max = 50)
+```
+
+
+
+```{r}
+par(mfrow = c(1, 2))
+acf(abs(wti.return), lag.max = 200)
 pacf(abs(wti.return), lag.max = 50)
-               
 ```
 ```{r}
 
