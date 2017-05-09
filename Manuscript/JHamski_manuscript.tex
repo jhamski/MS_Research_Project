@@ -38,46 +38,6 @@
 
 \setcounter{secnumdepth}{0}
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\ImportTok}[1]{{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
-\newcommand{\BuiltInTok}[1]{{#1}}
-\newcommand{\ExtensionTok}[1]{{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
-\newcommand{\RegionMarkerTok}[1]{{#1}}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
-\newcommand{\NormalTok}[1]{{#1}}
 \usepackage{longtable,booktabs}
 
 \usepackage{graphicx}
@@ -246,23 +206,6 @@ crude oil market and larger economic indicators are intertwined (add
 cite). Instead, it contributes to our understanding of the system
 dynamics of an essential energy commodity.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(broom)}
-\KeywordTok{library}\NormalTok{(changepoint)}
-\KeywordTok{library}\NormalTok{(knitr)}
-\KeywordTok{library}\NormalTok{(magrittr)}
-\KeywordTok{library}\NormalTok{(TSA)}
-\KeywordTok{library}\NormalTok{(xts)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{load}\NormalTok{(}\StringTok{"wti_project.Rda"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \section{Exploratory Data Analysis}\label{exploratory-data-analysis}
 
 \subsection{Data Source}\label{data-source}
@@ -272,27 +215,19 @@ inflation adjusted) daily spot price record from the U.S. Energy
 Information Administration. The WTI series was filtered to the date
 range January 2, 1986 through December 30, 2016.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{summary}\NormalTok{(wti.xts) %>%}\StringTok{ }\KeywordTok{tidy}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##    Var1       Var2                 Freq
-## 1            Index Min.   :1986-01-03  
-## 2            Index 1st Qu.:1993-09-01  
-## 3            Index Median :2001-06-11  
-## 4            Index Mean   :2001-06-19  
-## 5            Index 3rd Qu.:2009-03-31  
-## 6            Index Max.   :2016-12-30  
-## 7          wti.xts     Min.   : 10.25  
-## 8          wti.xts     1st Qu.: 19.38  
-## 9          wti.xts     Median : 28.01  
-## 10         wti.xts     Mean   : 42.87  
-## 11         wti.xts     3rd Qu.: 63.47  
-## 12         wti.xts     Max.   :145.31
-\end{verbatim}
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+& Date Range & Price Range\tabularnewline
+\midrule
+\endhead
+& Min. :1986-01-03 & Min. : 10.25\tabularnewline
+& 1st Qu.:1993-09-01 & 1st Qu.: 19.38\tabularnewline
+& Median :2001-06-11 & Median : 28.01\tabularnewline
+& Mean :2001-06-19 & Mean : 42.87\tabularnewline
+& 3rd Qu.:2009-03-31 & 3rd Qu.: 63.47\tabularnewline
+& Max. :2016-12-30 & Max. :145.31\tabularnewline
+\bottomrule
+\end{longtable}
 
 \subsection{Returns and Volatility}\label{returns-and-volatility}
 
@@ -303,50 +238,17 @@ investigated. Single-period returns were calculated as:
 \[R_t = \frac{P_t-P_{t-1}}{P_{t-1}}\] and in some sections, their
 absolute values are used.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{))}
-\KeywordTok{plot.xts}\NormalTok{(wti.xts, }\DataTypeTok{type =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Nominal Dollars ($)"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"WTI Price Series"}\NormalTok{)}
-\KeywordTok{plot.xts}\NormalTok{(wti.return, }\DataTypeTok{type =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"WTI Return Series"}\NormalTok{)}
-\KeywordTok{plot.xts}\NormalTok{(wti.combined[,}\DecValTok{3}\NormalTok{], }\DataTypeTok{type =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"WTI 30-day Historic Volatility"}\NormalTok{)}
-\KeywordTok{plot.xts}\NormalTok{(wti.combined[,}\DecValTok{4}\NormalTok{], }\DataTypeTok{type =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"WTI 5-day Historic Volatility"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-4-1.pdf}
+\includegraphics{Figs/unnamed-chunk-4-1.pdf}
 
 Ase seen in Figure 1, most of the series from 1986 through 2004 contains
 prices between \$10/barrel and \$40/barrel. This results in a price
 series with left skew and a long right tail. These distribution
 characteristics are common in financial time series. The return series
-displays the
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
-\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(wti.xts), }\DataTypeTok{main =} \StringTok{"Oil Prices Density Plot"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Dollars per Barrel"}\NormalTok{)}
-\KeywordTok{curve}\NormalTok{(}\KeywordTok{dnorm}\NormalTok{(x, }\DataTypeTok{mean=}\KeywordTok{mean}\NormalTok{(wti.xts), }\DataTypeTok{sd=}\KeywordTok{sd}\NormalTok{(wti.xts)), }
-          \DataTypeTok{col=}\StringTok{"darkblue"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{1}\NormalTok{, }\DataTypeTok{add=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{yaxt=}\StringTok{"n"}\NormalTok{)}
-
-\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(wti.return), }\DataTypeTok{main =} \StringTok{"Oil Returns Density Plot"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Dollars per Barrel"}\NormalTok{)}
-\KeywordTok{curve}\NormalTok{(}\KeywordTok{dnorm}\NormalTok{(x, }\DataTypeTok{mean=}\KeywordTok{mean}\NormalTok{(wti.return), }\DataTypeTok{sd=}\KeywordTok{sd}\NormalTok{(wti.return)), }
-          \DataTypeTok{col=}\StringTok{"darkblue"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{1}\NormalTok{, }\DataTypeTok{add=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{yaxt=}\StringTok{"n"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-5-1.pdf}
+displays the \includegraphics{Figs/unnamed-chunk-5-1.pdf}
 
 Times series exploration
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
-\KeywordTok{acf}\NormalTok{(}\KeywordTok{abs}\NormalTok{(wti.return), }\DataTypeTok{lag.max =} \DecValTok{50}\NormalTok{)}
-\KeywordTok{pacf}\NormalTok{(}\KeywordTok{abs}\NormalTok{(wti.return), }\DataTypeTok{lag.max =} \DecValTok{50}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-6-1.pdf}
+\includegraphics{Figs/unnamed-chunk-6-1.pdf}
 
 A challenge in analyzing financial time series in general, and spot oil
 market prices specifically, is that the variance structure may be
@@ -357,27 +259,16 @@ clustering. This violates the assumption in the most frequently used
 time series model, the autoregressive integrated moving average (ARIMA)
 model.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{McLeod.Li.test}\NormalTok{(}\DataTypeTok{y =} \NormalTok{wti.return)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-7-1.pdf}
+\includegraphics{Figs/unnamed-chunk-7-1.pdf}
 
 \section{Price-Volatility Regression
 Analysis}\label{price-volatility-regression-analysis}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{cov.results <-}\StringTok{ }\KeywordTok{cov}\NormalTok{(wti.df)[}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{:}\DecValTok{4}\NormalTok{]}
-\NormalTok{cor.results <-}\StringTok{ }\KeywordTok{cor}\NormalTok{(wti.df)[}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{:}\DecValTok{4}\NormalTok{]}
-
-\NormalTok{cov.cor <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(cov.results, cor.results)}
-\KeywordTok{colnames}\NormalTok{(cov.cor) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Covariance"}\NormalTok{, }\StringTok{"Correlation"}\NormalTok{)}
-\KeywordTok{kable}\NormalTok{(cov.cor)}
-\end{Highlighting}
-\end{Shaded}
+Relating price level and the measures of volatility at each time in the
+series is a simple exploration of the research problem. The covariance
+and correlation measures of vectors representing price versus returns,
+30-day, and 5-day historic volatility indicate a weak, negative
+relationship.
 
 \begin{longtable}[]{@{}lrr@{}}
 \toprule
@@ -390,55 +281,35 @@ return & -0.0396337 & -0.0719290\tabularnewline
 \bottomrule
 \end{longtable}
 
+\begin{verbatim}
+## numeric(0)
+\end{verbatim}
+
+\begin{verbatim}
+## numeric(0)
+\end{verbatim}
+
+\begin{verbatim}
+## numeric(0)
+\end{verbatim}
+
+\includegraphics{Figs/unnamed-chunk-9-1.pdf}
+
 The case of 30-day historic volatility indicates a negative relationship
 between price level and volatility. However, this result appears to be
-due to a cluster high volatility around \$20/barrel, creating a leverage
-point. Residual analysis indicates that this is not a good relationship
-to model with linear regression.
+due to a cluster high volatility around \$20 per barrel, creating a
+leverage point. Residual analysis indicates that this is not a good
+relationship to model with linear regression. Residual analysis for the
+other volatility measures also display
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{returns.lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(return ~}\StringTok{ }\NormalTok{close, }\DataTypeTok{data =} \NormalTok{wti.combined)}
-\NormalTok{TD.lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\StringTok{`}\DataTypeTok{30-day}\StringTok{`} \NormalTok{~}\StringTok{ }\NormalTok{close, }\DataTypeTok{data =} \NormalTok{wti.combined)}
-\NormalTok{FD.lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\StringTok{`}\DataTypeTok{5-day}\StringTok{`} \NormalTok{~}\StringTok{ }\NormalTok{close, }\DataTypeTok{data =} \NormalTok{wti.combined)}
+\includegraphics{Figs/unnamed-chunk-10-1.pdf}
+\includegraphics{Figs/unnamed-chunk-10-2.pdf}
+\includegraphics{Figs/unnamed-chunk-10-3.pdf}
+\includegraphics{Figs/unnamed-chunk-10-4.pdf}
 
-\KeywordTok{plot}\NormalTok{(}\DataTypeTok{x =} \NormalTok{wti.df$close, }\DataTypeTok{y =} \NormalTok{wti.df$return) +}\StringTok{ }\KeywordTok{abline}\NormalTok{(returns.lm)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-9-1.pdf}
-
-\begin{verbatim}
-## numeric(0)
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(}\DataTypeTok{x =} \NormalTok{wti.df$close, }\DataTypeTok{y =} \NormalTok{wti.df$}\StringTok{`}\DataTypeTok{30-day}\StringTok{`}\NormalTok{) +}\StringTok{ }\KeywordTok{abline}\NormalTok{(TD.lm)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-9-2.pdf}
-
-\begin{verbatim}
-## numeric(0)
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(}\DataTypeTok{x =} \NormalTok{wti.df$close, }\DataTypeTok{y =} \NormalTok{wti.df$}\StringTok{`}\DataTypeTok{5-day}\StringTok{`}\NormalTok{) +}\StringTok{ }\KeywordTok{abline}\NormalTok{(FD.lm)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{JHamski_manuscript_files/figure-latex/unnamed-chunk-9-3.pdf}
-
-\begin{verbatim}
-## numeric(0)
-\end{verbatim}
-
-As seen in Figure 1, nominal oil prices have spent time as high as
-\$145/barrel. However, the majority of the time series is far lower,
-with a median price of \$28/barrel. This means that the dataset is
+As seen in Figure 1, nominal oil prices have spent time as high as \$145
+per barrel. However, the majority of the time series is far lower, with
+a median price of \$28 per barrel. This means that the dataset is
 unbalanced and higher price levels represent a smaller portion of the
 dataset. In addition, oil price (and financial time series in general)
 exhibits volatility clustering. Therefore, it is anticipated that this
@@ -460,6 +331,48 @@ compared to the entire record.
 
 Changepoint detection proceeds by minimizing a cost function over
 possible locations and number of changepoints. The cost function:
+
+\includegraphics{Figs/unnamed-chunk-11-1.pdf}
+
+\includegraphics{Figs/unnamed-chunk-13-1.pdf}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = var ~ med, data = price.regime.descriptive)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -85.760 -35.751  -0.006  14.071 111.861 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)  
+## (Intercept) -33.3214    57.1329  -0.583   0.5780  
+## med           1.7674     0.8623   2.050   0.0796 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 70.58 on 7 degrees of freedom
+## Multiple R-squared:  0.375,  Adjusted R-squared:  0.2858 
+## F-statistic: 4.201 on 1 and 7 DF,  p-value: 0.07958
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrr@{}}
+\toprule
+regime & med & var\tabularnewline
+\midrule
+\endhead
+1 & 18.940 & 14.22440\tabularnewline
+2 & 28.820 & 17.61040\tabularnewline
+3 & 47.150 & 29.50349\tabularnewline
+4 & 63.765 & 43.62747\tabularnewline
+5 & 105.315 & 264.67635\tabularnewline
+6 & 58.580 & 153.52032\tabularnewline
+7 & 78.085 & 18.92845\tabularnewline
+8 & 96.090 & 58.67639\tabularnewline
+9 & 46.630 & 59.71733\tabularnewline
+\bottomrule
+\end{longtable}
 \newpage
 \singlespacing
 \bibliography{master.bib}

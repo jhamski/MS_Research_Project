@@ -21,6 +21,10 @@ bibliography: master.bib
 biblio-style: apsr
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
 # Acknowledgements   
 *I would like to thank John Kemp, Thompson Reuters energy journalist, for posing the question investigated in this research paper. In addition, I thank Tancred Lidderdale and Mason Hamilton from the U.S. Energy Information Administration for additional information pertaining to the question.* 
   
@@ -37,10 +41,9 @@ Note that in this research paper *oil price* is used to specifically mean spot-t
 
 
 ```{r, message = FALSE, warning = FALSE}
-library(broom)
 library(changepoint)
 library(knitr)
-library(magrittr)
+library(tidyverse)
 library(TSA)
 library(xts)
 ```
@@ -55,7 +58,7 @@ load("wti_project.Rda")
 ## Data Source  
 The data source is the West Texas Intermediate (WTI) nominal (i.e. not inflation adjusted) daily spot price record from the U.S. Energy Information Administration. The WTI series was filtered to the date range January 2, 1986 through December 30, 2016. 
 ```{r}
-summary(wti.xts) %>% tidy()
+summary(wti.xts) %>% kable(col.names = c("Date Range", "Price Range"))
 ```
 
 ## Returns and Volatility
@@ -77,11 +80,11 @@ Ase seen in Figure 1, most of the series from 1986 through 2004 contains prices 
 par(mfrow = c(1, 2))
 plot(density(wti.xts), main = "Oil Prices Density Plot", xlab = "Dollars per Barrel")
 curve(dnorm(x, mean=mean(wti.xts), sd=sd(wti.xts)), 
-          col="darkblue", lwd=1, add=TRUE, yaxt="n")
+          col="red", lwd=1, add=TRUE, yaxt="n")
 
 plot(density(wti.return), main = "Oil Returns Density Plot", xlab = "Dollars per Barrel")
 curve(dnorm(x, mean=mean(wti.return), sd=sd(wti.return)), 
-          col="darkblue", lwd=1, add=TRUE, yaxt="n")
+          col="red", lwd=1, add=TRUE, yaxt="n")
 ```
 
 
@@ -102,7 +105,7 @@ McLeod.Li.test(y = wti.return)
 
 # Price-Volatility Regression Analysis
 
-
+Relating price level and the measures of volatility at each time in the series is a simple exploration of the research problem. The covariance and correlation measures of vectors representing price versus returns, 30-day, and 5-day historic volatility indicate a weak, negative relationship. 
 ```{r}
 cov.results <- cov(wti.df)[1,2:4]
 cor.results <- cor(wti.df)[1,2:4]
@@ -112,22 +115,26 @@ colnames(cov.cor) <- c("Covariance", "Correlation")
 kable(cov.cor)
 ```
 
-The case of 30-day historic volatility indicates a negative relationship between price level and volatility. However, this result appears to be due to a cluster high volatility around $20/barrel, creating a leverage point. Residual analysis indicates that this is not a good relationship to model with linear regression. 
+
 
 ```{r}
 returns.lm <- lm(return ~ close, data = wti.combined)
 TD.lm <- lm(`30-day` ~ close, data = wti.combined)
 FD.lm <- lm(`5-day` ~ close, data = wti.combined)
+par(mfrow = c(2, 2))
+plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm, col="red")
+plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm, col="red")
+plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm, col="red")
+```
 
-plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm)
-plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm)
-plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm)
+The case of 30-day historic volatility indicates a negative relationship between price level and volatility. However, this result appears to be due to a cluster high volatility around $20 per barrel, creating a leverage point. Residual analysis indicates that this is not a good relationship to model with linear regression. Residual analysis for the other volatility measures also display 
+
+```{r}
+#plot(TD.lm)
 ```
 
 
-As seen in Figure 1, nominal oil prices have spent time as high as $145/barrel. However, the majority of the time series is far lower, with a median price of $28/barrel. This means that the dataset is unbalanced and higher price levels represent a smaller portion of the dataset. In addition, oil price (and financial time series in general) exhibits volatility clustering. Therefore, it is anticipated that this simple regression model based on price and volatility is not the best possible solution to the question of characterizing the dependency of volatility on price.  
-
-
+As seen in Figure 1, nominal oil prices have spent time as high as \$145 per barrel. However, the majority of the time series is far lower, with a median price of \$28 per barrel. This means that the dataset is unbalanced and higher price levels represent a smaller portion of the dataset. In addition, oil price (and financial time series in general) exhibits volatility clustering. Therefore, it is anticipated that this simple regression model based on price and volatility is not the best possible solution to the question of characterizing the dependency of volatility on price.  
 
 
 # Comparing Volatility across Price Regimes  
@@ -135,3 +142,39 @@ As seen in Figure 1, nominal oil prices have spent time as high as $145/barrel. 
 Changepoint detection aims to detect the point or points where the statistical properties of a sequence of observations change (Killick and Eckley, 2014). Changepoint detection was used to detect change in the oil price mean throughout the period of record using the Pruned Exact Linear Time (PELT) algorithm (Killick et al. 2012). The time series between these changepoints represent “price regimes” (i.e. time series between changepoints) which have generally similar mean oil price compared to the entire record. 
 
 Changepoint detection proceeds by minimizing a cost function over possible locations and number of changepoints. The cost function:
+
+
+```{r}
+cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, minseglen = 250)
+
+#cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "SIC", minseglen = 250)
+
+#length(cpt.1@cpts)
+plot(cpt.1, cpt.width = 4)
+```
+
+```{r}
+regimes <- cpt.1@cpts
+regime.index <- NULL
+
+for (i in 1:length(regimes)){
+  ifelse(i == 1, 
+         regime.index.iter <- rep.int(i, times = length(1:regimes[i])), 
+         regime.index.iter <- rep.int(i, times = length((regimes[i-1]+1):regimes[i])))
+  regime.index <- c(regime.index, regime.index.iter)
+}
+
+wti.regimes <- cbind(wti.ts, regime.index) %>% as.data.frame()
+colnames(wti.regimes) <- c("close", "regime")
+wti.regimes$regime <- as.factor(wti.regimes$regime)
+```
+
+```{r}
+price.regime.descriptive <- wti.regimes %>%
+  group_by(regime) %>% 
+  summarize(med = median(close), var = var(close))
+
+plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p")
+summary(lm(var ~ med, data = price.regime.descriptive))
+kable(price.regime.descriptive)
+```
