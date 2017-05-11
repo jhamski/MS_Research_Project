@@ -19,7 +19,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 
 # Introduction
 
-In a commodity trading market the price level is expected to be tied to the system dynamics, namely supply, demand, and delivery of the commodity being traded. Volatility, the variation in price over time, reflects uncertainty in the balance of these system factors. This research paper aims to answer a simply posed question: “does oil price volatility scale with price?”; i.e., can we expect to observe larger price swings when the price is near $100/barrel vs $20/barrel?  
+In a commodity trading market the price level is expected to be tied to the system dynamics, namely supply, demand, and delivery of the commodity being traded. Volatility, the variation in price over time, reflects uncertainty in the balance of these system factors. This research paper aims to answer a simply posed question: “does oil price volatility scale with price?”; i.e., can we expect to observe larger price swings when the price is near \$100 per barrel vs \$20 per barrel?  
 
 If oil price volatility reflects uncertainty about supply and demand dynamics, it isn’t immediately clear whether we should expect volatility to depend on price level. Higher oil prices are associated with “tightness” in the supply market, meaning there is little excess capacity to increase production, therefore we may expect swings higher but some base price support that results in lower measured volatility. Likewise, low prices may suggest excess capacity that can buffer shocks to the oil delivery system, dampening volatility. Despite these "just so" arguments, a multitude of factors such as storage dynamics, supply chain distruptions, the ability of producers to increase production to bring more oil to market or shut in production capacity in response to prices (“rebalancing”), and market speculation complicate this picture and suggest it must be studied empirically. 
 
@@ -158,7 +158,7 @@ price.regime.descriptive <- wti.regimes %>%
   summarize(med = median(close), var = var(close))
 par(mfrow = c(1, 2))
 plot(cpt.1, cpt.width = 4) 
-plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p") + abline(lm(var ~ med, data = price.regime.descriptive))
+plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p") + abline(lm(var ~ med, data = price.regime.descriptive), color = "red")
 
 summary(lm(var ~ med, data = price.regime.descriptive)) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable.")
 #kable(price.regime.descriptive)
