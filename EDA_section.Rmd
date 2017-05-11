@@ -71,9 +71,17 @@ par(mfrow = c(1, 2))
 acf(abs(wti.return), lag.max = 200)
 pacf(abs(wti.return), lag.max = 50)
 ```
+
+
+
 ```{r}
 
 McLeod.Li.test(y = wti.return)
 
 ```
+```{r}
+stl(wti.ts, s.window="periodic")
+```
+
+
 

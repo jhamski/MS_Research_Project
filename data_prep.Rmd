@@ -76,19 +76,24 @@ wti.return <- wti.return[-1]
 vols.30 <- apply(wti.return , 2, function(x) {
     #use rolling 30 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.return %>% runSD(n=30) * sqrt(252/12)
+  wti.return %>% runSD(n=30)
 })
+
+#vols.30 <- rollapply(wti.ts, 30, sd)
 ```
 
 ```{r}
 vols.5 <- apply(wti.return, 2, function(x) {
     #use rolling 5 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
-  wti.return %>% runSD(n=5) * sqrt(252/5)
+  wti.return %>% runSD(n=5)
 })
+
+#vols.5 <- rollapply(wti.ts, 5, sd)
 ```
 
 ```{r}
+len <- length(wti.xts)
 wti.combined <- cbind.xts(wti.xts, wti.return, vols.30, vols.5) %>% na.omit()
 colnames(wti.combined)<- c("close", "return", "30-day", "5-day")
 ```

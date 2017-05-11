@@ -1,38 +1,27 @@
 ---
-output: 
+title: Should we expect higher oil price volatility when oil prices are higher?
+author: James Hamski (james.hamski@spsmail.cuny.edu)
+date: "5/19/2017"
+output:
   pdf_document:
-    citation_package: natbib
-    keep_tex: true
-    fig_caption: true
-    latex_engine: pdflatex
-    template: svm-latex-ms.tex
-title: "Oil Price Volatility"
-author:
-- name: James P. Hamski
-  affiliation: City University of New York
-abstract: "Oil price volatility ..."
-keywords: "oil price, commodities, time series analysis, volatility clustering"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
-geometry: margin=1in
-fontfamily: mathpazo
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
 fontsize: 11pt
 spacing: double
-bibliography: master.bib
-biblio-style: apsr
+csl: report_formatting.csl
 ---
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
                       echo=FALSE, warning=FALSE, message=FALSE)
 ```
-# Acknowledgements   
-*I would like to thank John Kemp, Thompson Reuters energy journalist, for posing the question investigated in this research paper. In addition, I thank Tancred Lidderdale and Mason Hamilton from the U.S. Energy Information Administration for additional information pertaining to the question.* 
-  
+
 # Introduction
 
-In a commodity trading market the price level is expected to be tied to the system dynamics. Volatility, the variation in price over time, reflects uncertainty in the supply, demand, and delivery of the commodity being traded.  This research paper aims to answer a simply posed question: “does oil price volatility scale with price?”; i.e., can we expect to observe larger price swings when the price is near $100/barrel vs $20/barrel? 
+In a commodity trading market the price level is expected to be tied to the system dynamics, namely supply, demand, and delivery of the commodity being traded. Volatility, the variation in price over time, reflects uncertainty in the balance of these system factors. This research paper aims to answer a simply posed question: “does oil price volatility scale with price?”; i.e., can we expect to observe larger price swings when the price is near $100/barrel vs $20/barrel?  
 
-If oil price volatility reflects uncertainty about supply and demand dynamics, it isn’t immediately clear whether we should expect volatility to depend on price level. Higher oil prices are associated with “tightness” in the supply market, meaning there is little excess capacity to increase production. However, factors such as storage dynamics, the ability of producers to increase production fast enough to bring more oil to market in response to high prices (“rebalancing”), and market speculation complicate this picture and mean it must be studied empirically. 
+If oil price volatility reflects uncertainty about supply and demand dynamics, it isn’t immediately clear whether we should expect volatility to depend on price level. Higher oil prices are associated with “tightness” in the supply market, meaning there is little excess capacity to increase production, therefore we may expect swings higher but some base price support that results in lower measured volatility. Likewise, low prices may suggest excess capacity that can buffer shocks to the oil delivery system, dampening volatility. Despite these "just so" arguments, a multitude of factors such as storage dynamics, supply chain distruptions, the ability of producers to increase production to bring more oil to market or shut in production capacity in response to prices (“rebalancing”), and market speculation complicate this picture and suggest it must be studied empirically. 
 
 If it is found that oil price volatility is dependent on price level, the relationship may follow a scaling formula. For instance, if we can expect volatility of $1/barrel when oil is at $20/barrel, can we expect volatility of $5/barrel at $100/barrel price levels via a simple linear scaling rule? Three methods are presented in this research paper to answer this question: (1) regression modeling of price and volatility, (2) viewing volatility within oil price regimes, and (3) using multivariate Generalized Autoregressive Conditional Heteroskedasticity (GARCH) modeling. 
 
@@ -41,6 +30,7 @@ Note that in this research paper *oil price* is used to specifically mean spot-t
 
 
 ```{r, message = FALSE, warning = FALSE}
+library(broom)
 library(changepoint)
 library(knitr)
 library(tidyverse)
@@ -58,25 +48,26 @@ load("wti_project.Rda")
 ## Data Source  
 The data source is the West Texas Intermediate (WTI) nominal (i.e. not inflation adjusted) daily spot price record from the U.S. Energy Information Administration. The WTI series was filtered to the date range January 2, 1986 through December 30, 2016. 
 ```{r}
-summary(wti.xts) %>% kable(col.names = c("Date Range", "Price Range"))
+summary(wti.xts) %>% kable(col.names = c("Date Range", "Price Range"), caption = "Oil price series date and price ranges.")
 ```
 
 ## Returns and Volatility
 
 In this research paper, volatility is characterized two ways: (1) 5-day historic volatility and (2) 30-day historic volatility. In addition, the relationship between the returns themselves and price level is investigated. Single-period returns were calculated as: 
 $$R_t = \frac{P_t-P_{t-1}}{P_{t-1}}$$
-and in some sections, their absolute values are used. 
+In some sections, their absolute values are used. 
 
-```{r}
+```{r fig.cap="Price level, return, and volatility series plots of WTI spot oil prices." }
 par(mfrow = c(2, 2))
 plot.xts(wti.xts, type = "l", ylab = "Nominal Dollars ($)", main = "WTI Price Series")
 plot.xts(wti.return, type = "l", main = "WTI Return Series")
 plot.xts(wti.combined[,3], type = "l", main = "WTI 30-day Historic Volatility")
 plot.xts(wti.combined[,4], type = "l", main = "WTI 5-day Historic Volatility")
 ```
+  
+A seen in Figure 1, most of the series from 1986 through 2004 contains prices between $10/barrel and $40/barrel. This results in a price series with left skew and a long right tail (Figure 2). The return series indicates heteroscedasticity   These distribution characteristics are common in financial time series. 
+```{r fig.cap="Density plots demonstrating non-normality of price and return series distributions." }
 
-Ase seen in Figure 1, most of the series from 1986 through 2004 contains prices between $10/barrel and $40/barrel. This results in a price series with left skew and a long right tail. These distribution characteristics are common in financial time series. The return series displays the 
-```{r}
 par(mfrow = c(1, 2))
 plot(density(wti.xts), main = "Oil Prices Density Plot", xlab = "Dollars per Barrel")
 curve(dnorm(x, mean=mean(wti.xts), sd=sd(wti.xts)), 
@@ -88,20 +79,17 @@ curve(dnorm(x, mean=mean(wti.return), sd=sd(wti.return)),
 ```
 
 
-Times series exploration 
+# Times series exploration 
 
-```{r}
+```{r fig.cap= "Autocorrelation plots for prices and returns."}
 par(mfrow = c(1, 2))
-acf(abs(wti.return), lag.max = 50)
-pacf(abs(wti.return), lag.max = 50)
+acf(abs(wti.return), lag.max = 50, main = "Autocorrelation of Prices")
+pacf(abs(wti.return), lag.max = 50, main = "Autocorrelation of Returns")
                
 ```
 
 A challenge in analyzing financial time series in general, and spot oil market prices specifically, is that the variance structure may be independent, but not identically distributed. Oil prices exhibit periods of low volatility (i.e. relatively constant prices) and periods of high volatility (i.e. changing prices). This is referred to as volatility clustering. This violates the assumption in the most frequently used time series model, the autoregressive integrated moving average (ARIMA) model.  
 
-```{r}
-McLeod.Li.test(y = wti.return)
-```
 
 # Price-Volatility Regression Analysis
 
@@ -112,12 +100,12 @@ cor.results <- cor(wti.df)[1,2:4]
 
 cov.cor <- cbind(cov.results, cor.results)
 colnames(cov.cor) <- c("Covariance", "Correlation")
-kable(cov.cor)
+kable(cov.cor, caption = "Covariance and correlation of price level and returns, 30-day, and 5-day historic volatility.")
 ```
 
 
 
-```{r}
+```{r fig.cap= "Scatterplots with a linear model relating spot oil price with returns, 30-day, and 5-day historic volatility."}
 returns.lm <- lm(return ~ close, data = wti.combined)
 TD.lm <- lm(`30-day` ~ close, data = wti.combined)
 FD.lm <- lm(`5-day` ~ close, data = wti.combined)
@@ -134,7 +122,7 @@ The case of 30-day historic volatility indicates a negative relationship between
 ```
 
 
-As seen in Figure 1, nominal oil prices have spent time as high as \$145 per barrel. However, the majority of the time series is far lower, with a median price of \$28 per barrel. This means that the dataset is unbalanced and higher price levels represent a smaller portion of the dataset. In addition, oil price (and financial time series in general) exhibits volatility clustering. Therefore, it is anticipated that this simple regression model based on price and volatility is not the best possible solution to the question of characterizing the dependency of volatility on price.  
+As seen in Figure 1, nominal oil prices have spent time as high as \$145 per barrel. However, the majority of the time series is far lower, with a median price of \$28 per barrel. This means that the dataset is unbalanced and higher price levels represent a smaller portion of the dataset. In addition, oil price (and financial time series in general) exhibits volatility clustering. Therefore, it is anticipated that this simple regression model based on price and volatility is not the best possible solution to the question of characterizing the dependency of volatility on price. 
 
 
 # Comparing Volatility across Price Regimes  
@@ -144,13 +132,8 @@ Changepoint detection aims to detect the point or points where the statistical p
 Changepoint detection proceeds by minimizing a cost function over possible locations and number of changepoints. The cost function:
 
 
-```{r}
-cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 10000, minseglen = 250)
-
-#cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "SIC", minseglen = 250)
-
-#length(cpt.1@cpts)
-plot(cpt.1, cpt.width = 4)
+```{r fig.cap="Changepoint analysis and resulting price regimes."}
+cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 5000, minseglen = 250)
 ```
 
 ```{r}
@@ -169,12 +152,63 @@ colnames(wti.regimes) <- c("close", "regime")
 wti.regimes$regime <- as.factor(wti.regimes$regime)
 ```
 
-```{r}
+```{r fig.cap="Some caption"}
 price.regime.descriptive <- wti.regimes %>%
   group_by(regime) %>% 
   summarize(med = median(close), var = var(close))
+par(mfrow = c(1, 2))
+plot(cpt.1, cpt.width = 4) 
+plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p") + abline(lm(var ~ med, data = price.regime.descriptive))
 
-plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p")
-summary(lm(var ~ med, data = price.regime.descriptive))
-kable(price.regime.descriptive)
+summary(lm(var ~ med, data = price.regime.descriptive)) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable.")
+#kable(price.regime.descriptive)
 ```
+
+
+ 
+```{r fig.cap = "Histogram showing price distribution after limiting to 1998 through 2016."}
+wti.ts.recent <- wti.xts[paste("1998-01-01", "2016-12-31",sep="::")] %>% as.ts()
+wti.df.recent <- slice(wti.df, 3019:nrow(wti.df))
+
+cpt.2 = cpt.mean(wti.ts.recent, method="PELT", penalty = "Manual", pen.value = 500, minseglen = 150)
+
+
+
+par(mfrow = c(1, 2))
+hist(wti.ts.recent) 
+plot(cpt.2, cpt.width = 4, main = "Histogram of WTI spot oil prices")
+```
+
+```{r}
+regimes <- cpt.2@cpts
+regime.index <- NULL
+
+for (i in 1:length(regimes)){
+  ifelse(i == 1, 
+         regime.index.iter <- rep.int(i, times = length(1:regimes[i])), 
+         regime.index.iter <- rep.int(i, times = length((regimes[i-1]+1):regimes[i])))
+  regime.index <- c(regime.index, regime.index.iter)
+}
+
+wti.regimes.2 <- cbind(wti.ts.recent, regime.index) %>% as.data.frame()
+colnames(wti.regimes.2) <- c("close", "regime")
+wti.regimes.2$regime <- as.factor(wti.regimes.2$regime)
+```
+
+```{r fig.cap="Price regimes and linear model after limiting to 1998 through 2016."}
+price.regime.descriptive.2 <- wti.regimes.2 %>%
+  group_by(regime) %>% 
+  summarize(med = median(close), var = var(close))
+var.lm <- lm(var ~ med, data = price.regime.descriptive.2)
+
+
+plot(x = price.regime.descriptive.2$med, y = price.regime.descriptive.2$var, type = "p") + abline(var.lm, col = "red")
+
+summary(lm(var ~ med, data = price.regime.descriptive.2)) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable after limiting the time period to 1998 through 2016.")
+```
+
+
+
+# Acknowledgements   
+*I would like to thank John Kemp, Thompson Reuters energy journalist, for posing the question investigated in this research paper. In addition, I thank Tancred Lidderdale and Mason Hamilton from the U.S. Energy Information Administration for additional information pertaining to the question.* 
+  
