@@ -24,7 +24,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
-            pdftitle={Should we expect higher oil price volatility when oil prices are higher?},
+            pdftitle={Does oil volatility scale with increasing price?},
             pdfauthor={James Hamski (james.hamski@spsmail.cuny.edu)},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -74,7 +74,7 @@
 }
 
 \setlength{\droptitle}{-2em}
-  \title{Should we expect higher oil price volatility when oil prices are higher?}
+  \title{Does oil volatility scale with increasing price?}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
   \author{James Hamski
@@ -291,22 +291,26 @@ possible locations and number of changepoints. The cost function:
 ## numeric(0)
 \end{verbatim}
 
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Linear regression resulting from price as the predictor
-variable and regime variance as the response variable.}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-(Intercept) & -16.638829 & 29.8565115 & -0.5572931 &
-0.5867950\tabularnewline
-med & 1.337693 & 0.4993015 & 2.6791278 & 0.0189323\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = sd ~ med, data = price.regime.descriptive)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -4.107 -1.135 -0.713  1.310  5.576 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)   
+## (Intercept)  1.96662    1.51254   1.300  0.21611   
+## med          0.08285    0.02529   3.276  0.00602 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.921 on 13 degrees of freedom
+## Multiple R-squared:  0.4522, Adjusted R-squared:   0.41 
+## F-statistic: 10.73 on 1 and 13 DF,  p-value: 0.006024
+\end{verbatim}
 
 \begin{figure}[htbp]
 \centering
@@ -326,23 +330,38 @@ through 2016.}
 ## numeric(0)
 \end{verbatim}
 
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Linear regression resulting from price as the predictor
-variable and regime variance as the response variable after limiting the
-time period to 1998 through 2016.}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-(Intercept) & -18.5536357 & 14.9037212 & -1.244900 &
-0.2251879\tabularnewline
-med & 0.8855875 & 0.2291845 & 3.864081 & 0.0007423\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = sd ~ med, data = price.regime.descriptive.2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.2593 -1.0648 -0.3374  0.9833  6.1756 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  0.64302    0.96084   0.669     0.51    
+## med          0.07285    0.01478   4.930 4.96e-05 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.215 on 24 degrees of freedom
+## Multiple R-squared:  0.5032, Adjusted R-squared:  0.4825 
+## F-statistic: 24.31 on 1 and 24 DF,  p-value: 4.961e-05
+\end{verbatim}
+
+This section's analysis using changepoint analysis to break the oil
+price series into price regimes as defined by changes in the series mean
+is highly dependent upon model parameters. The PELT changepoint
+detection method identifies different changpoints depending on the
+minimum segment length and penalty parameters, and based on the section
+of the time series used. An interactive Shiny App was created and may be
+access in order to try different parameterizations of the changepoint
+model and view the effects on the relationship between medial regime
+price and standard deviation within that regime.
+
+\section{Multivariate GARCH Model}\label{multivariate-garch-model}
 
 \section{Acknowledgements}\label{acknowledgements}
 

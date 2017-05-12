@@ -1,5 +1,5 @@
 ---
-title: Should we expect higher oil price volatility when oil prices are higher?
+title: Does oil volatility scale with increasing price?
 author: James Hamski (james.hamski@spsmail.cuny.edu)
 date: "5/19/2017"
 output:
@@ -26,6 +26,7 @@ If oil price volatility reflects uncertainty about supply and demand dynamics, i
 If it is found that oil price volatility is dependent on price level, the relationship may follow a scaling formula. For instance, if we can expect volatility of $1/barrel when oil is at $20/barrel, can we expect volatility of $5/barrel at $100/barrel price levels via a simple linear scaling rule? Three methods are presented in this research paper to answer this question: (1) regression modeling of price and volatility, (2) viewing volatility within oil price regimes, and (3) using multivariate Generalized Autoregressive Conditional Heteroskedasticity (GARCH) modeling. 
 
 Note that in this research paper *oil price* is used to specifically mean spot-traded crude oil. This represents only one component of the oil markets, and most of the actual oil price is determined by futures and long term delivery contracts (need cite). This research paper is concerned with understanding the energy system using pricing information. In this way, it differs from much of the published research in that it is not concerned with forecasting prices or volatility. Nor is it addressing exogeneous system elements such as equity markets or interest rates, though the literature shows that the crude oil market and larger economic indicators are intertwined (add cite). Instead, it contributes to our understanding of the system dynamics of an essential energy commodity.  
+
 
 
 
@@ -103,14 +104,14 @@ colnames(cov.cor) <- c("Covariance", "Correlation")
 kable(cov.cor, caption = "Covariance and correlation of price level and returns, 30-day, and 5-day historic volatility.")
 ```
 
-
+In quantitative finance, a process where volatility scales with price is a lognormal process. When volatility is independent of price, the process is normal (Ho and Lee, 2003). Regression of the price level and squared returns is identified as the method of distinguishing lognormal from normal processes in the literature. However, this simple method of exploring the relationship between price level and volatlity does not provide a satisfactory explanation. Volatility in financial time sereis tends to cluster. 
 
 ```{r fig.cap= "Scatterplots with a linear model relating spot oil price with returns, 30-day, and 5-day historic volatility."}
 returns.lm <- lm(return ~ close, data = wti.combined)
 TD.lm <- lm(`30-day` ~ close, data = wti.combined)
 FD.lm <- lm(`5-day` ~ close, data = wti.combined)
 par(mfrow = c(2, 2))
-plot(x = wti.df$close, y = wti.df$return) + abline(returns.lm, col="red")
+plot(x = wti.df$close, y = wti.df$return**2) + abline(returns.lm, col="red")
 plot(x = wti.df$close, y = wti.df$`30-day`) + abline(TD.lm, col="red")
 plot(x = wti.df$close, y = wti.df$`5-day`) + abline(FD.lm, col="red")
 ```
@@ -155,12 +156,12 @@ wti.regimes$regime <- as.factor(wti.regimes$regime)
 ```{r fig.cap="Some caption"}
 price.regime.descriptive <- wti.regimes %>%
   group_by(regime) %>% 
-  summarize(med = median(close), var = var(close))
+  summarize(med = median(close), sd = sd(close))
 par(mfrow = c(1, 2))
 plot(cpt.1, cpt.width = 4) 
-plot(x = price.regime.descriptive$med, y = price.regime.descriptive$var, type = "p") + abline(lm(var ~ med, data = price.regime.descriptive), color = "red")
+plot(x = price.regime.descriptive$med, y = price.regime.descriptive$sd, type = "p") + abline(lm(sd ~ med, data = price.regime.descriptive), col = "red")
 
-summary(lm(var ~ med, data = price.regime.descriptive)) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable.")
+summary(lm(sd ~ med, data = price.regime.descriptive)) #%>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable.")
 #kable(price.regime.descriptive)
 ```
 
@@ -198,17 +199,27 @@ wti.regimes.2$regime <- as.factor(wti.regimes.2$regime)
 ```{r fig.cap="Price regimes and linear model after limiting to 1998 through 2016."}
 price.regime.descriptive.2 <- wti.regimes.2 %>%
   group_by(regime) %>% 
-  summarize(med = median(close), var = var(close))
-var.lm <- lm(var ~ med, data = price.regime.descriptive.2)
+  summarize(med = median(close), sd = sd(close))
+sd.lm <- lm(sd ~ med, data = price.regime.descriptive.2)
 
 
-plot(x = price.regime.descriptive.2$med, y = price.regime.descriptive.2$var, type = "p") + abline(var.lm, col = "red")
+plot(x = price.regime.descriptive.2$med, y = price.regime.descriptive.2$sd, type = "p") + abline(sd.lm, col = "red")
 
-summary(lm(var ~ med, data = price.regime.descriptive.2)) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable after limiting the time period to 1998 through 2016.")
+summary(lm(sd ~ med, data = price.regime.descriptive.2)) #%>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable after limiting the time period to 1998 through 2016.")
+
+
 ```
+
+This section's analysis using changepoint analysis to break the oil price series into price regimes as defined by changes in the series mean is highly dependent upon model parameters. The PELT changepoint detection method identifies different changpoints depending on the minimum segment length and penalty parameters, and based on the section of the time series used. An interactive Shiny App was created and may be access in order to try different parameterizations of the changepoint model and view the effects on the relationship between medial regime price and standard deviation within that regime. 
+
+# Multivariate GARCH Model
+
 
 
 
 # Acknowledgements   
 *I would like to thank John Kemp, Thompson Reuters energy journalist, for posing the question investigated in this research paper. In addition, I thank Tancred Lidderdale and Mason Hamilton from the U.S. Energy Information Administration for additional information pertaining to the question.* 
-  
+
+# Bibliography
+
+Thomas S. Y. Ho and Sang Bin Lee, 2004. The Oxford Guide to Financial Modeling: Applications for Capital Markets, Corporate Finance, Risk Management and Financial Institutions. ISBN: 9780195169621
