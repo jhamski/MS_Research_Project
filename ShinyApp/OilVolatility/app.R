@@ -41,7 +41,8 @@ ui <- fluidPage(
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("Plot")
+         plotOutput("CPTplot"),
+         plotOutput("Results")
       )
    )
 )
@@ -51,7 +52,7 @@ server <- function(input, output) {
    
 
    
-   output$Plot <- renderPlot({
+   output$CPTplot <- renderPlot({
      start = as.POSIXct(input$dateRange[1])
      end = as.POSIXct(input$dateRange[2])
      
@@ -64,6 +65,42 @@ server <- function(input, output) {
                      minseglen = input$minseg)
      
      plot(cpt, cpt.width = 5)
+   })
+   
+   
+   output$Results <- renderPlot({
+     start = as.POSIXct(input$dateRange[1])
+     end = as.POSIXct(input$dateRange[2])
+     
+     wti.ts.range <- wti.xts[paste(start, end, sep="::")] %>% as.ts()
+     
+     cpt <- cpt.mean(wti.ts.range, 
+                     method="PELT", 
+                     penalty = "Manual", 
+                     pen.value = input$penalty, 
+                     minseglen = input$minseg)
+     
+     regimes <- cpt@cpts
+     regime.index <- NULL
+     
+     for (i in 1:length(regimes)){
+       ifelse(i == 1, 
+              regime.index.iter <- rep.int(i, times = length(1:regimes[i])), 
+              regime.index.iter <- rep.int(i, times = length((regimes[i-1]+1):regimes[i])))
+       regime.index <- c(regime.index, regime.index.iter)
+     }
+     
+     wti.regimes <- cbind(wti.ts.range, regime.index) %>% as.data.frame()
+     colnames(wti.regimes) <- c("close", "regime")
+     wti.regimes$regime <- as.factor(wti.regimes$regime)
+     
+     price.regime.descriptive <- wti.regimes %>%
+       group_by(regime) %>% 
+       summarize(med = median(close), sd = sd(close))
+     
+     plot(x = price.regime.descriptive$med, y = price.regime.descriptive$sd, type = "p")
+     abline(lm(sd ~ med, data = price.regime.descriptive), col = "red")
+     
    })
    
 }

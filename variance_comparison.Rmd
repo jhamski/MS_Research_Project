@@ -65,7 +65,7 @@ https://en.wikipedia.org/wiki/F-test_of_equality_of_variances
 
 ```{r}
 
-wti.regimes.ret <-  cbind(wti.regimes[31:nrow(wti.regimes),], wti.df$return) 
+wti.regimes.ret <-  cbind(wti.regimes[30:nrow(wti.regimes),], wti.df$return) 
 colnames(wti.regimes.ret) <- c("close", "regime", "returns")
 
 barlets.test.price <- bartlett.test(x = wti.regimes$close, g = wti.regimes$regime)
@@ -77,6 +77,10 @@ barlets.test.return
 The Fligner Killeen test is a non-parametric test for homogeneity of group variances. This test indicates that the variances are indeed different scross the 9 regimes. 
 
 ```{r}
+wti.regimes.ret <-  cbind(wti.regimes[30:nrow(wti.regimes),], wti.df$return) 
+colnames(wti.regimes.ret) <- c("close", "regime", "returns")
+
+
 fligner.test(x = wti.regimes$close, g = wti.regimes$regime)
 
 fligner.test(x = wti.regimes.ret$returns, g = wti.regimes.ret$regime, na.action =  na.omit)

@@ -33,28 +33,17 @@ wti.xts <- xts(wti$wti, as.Date(wti$day, format='%m/%d/%y'))
 #wti.xts <- wti.xts[paste(start.date,end.date,sep="::")]
 ```
 
+
 ```{r}
 #first return calc
-#wti.return <- wti.xts %>% log() %>% diff(lag = 1) #%>% exp() %>% subtract(1)
+wti.return <- wti.xts %>% log() %>% diff() #%>% exp() %>% subtract(1)
+plot(wti.return)
+```
 
+```{r}
 #return cited in Modelling oil price volatility (Narayana and Narayana)
-return.calc <- function(series){
-  return.series <- series
-  
-  len <- length(series)
-  
-  for(i in 1:(len-1)){
-    return.iter <- (series[[i+1]] - series[[i]]) / series[[i]]
-    return.series[[i+1]] <- return.iter
-  }
-  
-  return.series[[1]] <- NA
-  
-  return(return.series)
-}
 
-wti.return <- return.calc(wti.xts)
-
+wti.return.unscaled <- wti.xts %>% diff() %>% abs()
 ```
 
 
@@ -68,11 +57,10 @@ wti.ts <- zoo(wti$wti, order.by=as.Date(as.character(wti$day), format='%m/%d/%y'
   na.remove()
 
 wti.xts <- wti.xts[-1]
-wti.return <- wti.return[-1]
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 vols.30 <- apply(wti.return , 2, function(x) {
     #use rolling 30 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
@@ -80,9 +68,10 @@ vols.30 <- apply(wti.return , 2, function(x) {
 })
 
 #vols.30 <- rollapply(wti.ts, 30, sd)
+
 ```
 
-```{r}
+```{r, eval = FALSE}
 vols.5 <- apply(wti.return, 2, function(x) {
     #use rolling 5 day window to calculate standard deviation.
     #annualize by multiplying by square root of time
@@ -93,17 +82,26 @@ vols.5 <- apply(wti.return, 2, function(x) {
 ```
 
 ```{r}
-len <- length(wti.xts)
-wti.combined <- cbind.xts(wti.xts, wti.return, vols.30, vols.5) %>% na.omit()
-colnames(wti.combined)<- c("close", "return", "30-day", "5-day")
+vols.30 <- volatility(wti.ts, n = 30, calc = "close")
+vols.5 <- volatility(wti.ts, n = 5, calc = "close")
 ```
 
-
-Take absolute value of returns
 ```{r}
-wti.combined$return <- abs(wti.combined$return)
-wti.df <- as.data.frame(wti.combined)
+len <- length(wti.xts)
+wti.combined <- cbind.xts(wti.xts, wti.return, wti.return.unscaled, vols.30, vols.5) %>% na.omit()
+colnames(wti.combined)<- c("close", "return", "unscaled", "30-day", "5-day")
 ```
+
+
+```{r}
+wti.df <- as.data.frame(wti.combined)
+
+wti.return <- wti.return %>% na.omit()
+wti.return.unscaled <- wti.return.unscaled %>% na.omit()
+```
+
+
+
 
 ```{r}
 save(wti, wti.return, wti.xts, wti.ts, wti.combined, wti.df, file = "wti_project.Rda")
