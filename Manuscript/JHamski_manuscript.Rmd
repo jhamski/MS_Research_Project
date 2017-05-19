@@ -25,7 +25,7 @@ If oil price volatility reflects uncertainty about supply and demand dynamics, i
 
 If it is found that oil price volatility is dependent on price level, the relationship may follow a scaling formula. For instance, if we can expect volatility of $1/barrel when oil is at $20/barrel, can we expect volatility of $5/barrel at $100/barrel price levels via a simple linear scaling rule? Three methods are presented in this research paper to answer this question: (1) regression modeling of price and volatility, (2) viewing volatility within oil price regimes, and (3) using multivariate Generalized Autoregressive Conditional Heteroskedasticity (GARCH) modeling. 
 
-Note that in this research paper *oil price* is used to specifically mean spot-traded crude oil. This represents only one component of the oil markets, and most of the actual oil price is determined by futures and long term delivery contracts (need cite). This research paper is concerned with understanding the energy system using pricing information. In this way, it differs from much of the published research in that it is not concerned with forecasting prices or volatility. Nor is it addressing exogeneous system elements such as equity markets or interest rates, though the literature shows that the crude oil market and larger economic indicators are intertwined (add cite). Instead, it contributes to our understanding of the system dynamics of an essential energy commodity.  
+Note that in this research paper *oil price* is used to specifically mean spot-traded crude oil. This represents only one component of the oil markets, and 90%-95% of oil is sold under term contracts (Platts, 2010). Still, the spot price of oil is an important economic indiator used by the U.S. Federal Reserve as consideration for monetary policy. This research paper is concerned with understanding the energy system using pricing information. In this way, it differs from much of the published research in that it is not concerned with forecasting prices or volatility. Nor is it addressing exogeneous system elements such as equity markets or interest rates, though the literature shows that the crude oil market and larger economic indicators are intertwined (add cite). Instead, it contributes to our understanding of the system dynamics of an essential energy commodity.  
 
 ```{r, message = FALSE, warning = FALSE}
 library(broom)
@@ -68,7 +68,9 @@ plot.xts(wti.combined[,4], type = "l", main = "WTI 30-day Historic Volatility")
 plot.xts(wti.combined[,5], type = "l", main = "WTI 5-day Historic Volatility")
 ```
   
-A seen in Figure 1, most of the series from 1986 through 2004 contains prices between $10/barrel and $40/barrel. This results in a price series with a skewness value `r skewness(wti.ts) %>% round(2)` and a long right tail (Figure 2), with most prices being around the series median of \$28 per barrel. The return series exhibits fatter tails and a narrower center than a normal distribution of the same descriptive parameters. The kurtosis value of the return series is `r kurtosis(wti.return) %>% round(2)`. Returns with excess kurtosis compared to normally distributed returns is a common characteristic in financial time series. This indicates that most returns are very close to the mean return, but some returns are dispersed very far from the mean.   
+A seen in Figure 1, most of the series from 1986 through 2004 contains prices between $10/barrel and $40/barrel. This results in a price series with a skewness value `r skewness(wti.ts) %>% round(2)` and a long right tail (Figure 2), with most prices being around the series median of \$28 per barrel. The return series exhibits fatter tails and a narrower center than a normal distribution of the same descriptive parameters. The kurtosis value of the return series is `r kurtosis(wti.return) %>% round(2)`. Returns with excess kurtosis compared to normally distributed returns is a common characteristic in financial time series. This indicates that most returns are very close to the mean return, but some returns are dispersed very far from the mean.  
+  
+  
 ```{r fig.cap="Price series and return density plots including normal distributions for comparison.", fig.height=5}
 
 par(mfrow = c(1, 2))
@@ -80,12 +82,13 @@ plot(density(wti.return), main = "Oil Returns Density Plot", xlab = "Dollars per
 curve(dnorm(x, mean=mean(wti.return), sd=sd(wti.return)), 
           col="red", lwd=1, add=TRUE, yaxt="n")
 ```
+  
 
 
 ## Autocorrelations
 
-The 
-
+The autocorrelation plots for the oil price and return series indicate a high degree of correlation between adjacent observations. While we are not utilizing an autoregressive model here, partial autocorrelations are also shown in Figure 3 to show that partial autocorrelations do not exist in the price series after a shift of 1 day, compared to a longer partial autocorrelation decay in the return series.   
+    
 ```{r fig.cap= "Autocorrelation plots for prices and returns.", fig.height=6}
 par(mfrow = c(2, 2))
 acf(abs(wti.ts), lag.max = 50, main = "Autocorrelation of Prices")
@@ -109,9 +112,6 @@ kable(cov.cor, caption = "Covariance and correlation of price level and returns,
 
 In quantitative finance, a process where volatility scales with price is a lognormal process. When volatility is independent of price, the process is normal (Ho and Lee, 2003). Regression of the price level and squared returns is identified as the method of distinguishing lognormal from normal processes in the literature. Figure 4 shows scatter plots of the two return series and two historic volatility measures fitted with a linear regression model.  
 
-
-
-
 ```{r fig.cap= "Scatterplots with a linear model relating spot oil price with returns, 30-day, and 5-day historic volatility."}
 returns.lm <- lm(return ~ close, data = wti.combined)
 
@@ -131,10 +131,12 @@ plot(x = wti.df$close, y = wti.df$`5-day`, main = "5-day Vol. vs. Price", ylab =
 abline(FD.lm, col="red")
 ```
 
-The case of 30-day historic volatility indicates a negative relationship between price level and volatility. However, this result appears to be due to a cluster high volatility around $20 per barrel, creating a leverage point. Residual analysis indicates that this is not a good relationship to model with linear regression. 
+The case of 30-day historic volatility indicates a negative relationship between price level and volatility. However, this result appears to be due to a cluster high volatility around \$20 per barrel, creating a leverage point. In addition, it is obvious from even the scatter plot that residuals will not indicate stochastic error. 
 
-```{r}
-plot(returns.unscaled)
+The unscaled returns appear to indicate an increasing relationship between day-over-day price change and base price. The resulting linear model is: $R_t = 0.013P_t+0.14$ has an $R^2$ value of `r summary(returns.unscaled)$r.squared %>% round(2)`. Analyzing the residuals by calculating Cook's Distance indicates that massive price movements in the fall of 2008 resulting from the financial crises are acting as leverate points and the relationship between unscaled returns and price may be weaker than indicated by the linear model. 
+
+```{r, fig.cap="Cook's Distance plot indicating measurements acting as leverage points.", fig.height=5}
+plot(returns.unscaled, which = 4)
 ```
 
 As seen in Figure 1, nominal oil prices have spent time as high as \$145 per barrel. However, the majority of the time series is far lower, with a median price of \$28 per barrel. This means that the dataset is unbalanced and higher price levels represent a smaller portion of the dataset. In addition, oil price (and financial time series in general) exhibits volatility clustering. Therefore, it is anticipated that this simple regression model based on price and volatility is not the best possible solution to the question of characterizing the dependency of volatility on price. A second time series was created by limiting WTI prices to the January 3, 1998 through December 31, 2016. This results in a distribution that, while significantly different than the normal distribution, is more evenly distributed across the price range from \$10.82 per barrel to \$145.30  per barrel (Figure 5). 
@@ -165,11 +167,11 @@ These results using simple linear regression models to study how daily returns a
 
 # Comparing Volatility across Price Regimes  
 
-In order to capture the volatility dynamics of the WTI price series, including volatility clustering and changes in base price, change point detection was used to break the series into price regimes. Change point detection aims to detect the point or points where the statistical properties of a sequence of observations change (Killick and Eckley, 2014). Change point detection was used to estimate changes in the oil price mean throughout the period of record using the Pruned Exact Linear Time (PELT) algorithm (Killick et al. 2012). The time series between these changepoints represent “price regimes” (i.e. time series between changepoints) which have generally similar mean oil price compared to the entire record. 
+Regime switching has been investigated in oil prices, however the focus has been on breaking volatility into regimes (Vo, 2009). In order to capture the volatility dynamics of the WTI price series, including volatility clustering and changes in base price, change point detection was used to break the series into price regimes.  Change point detection aims to detect the point or points where the statistical properties of a sequence of observations change (Killick et al., 2016). Change point detection was used to estimate changes in the oil price mean throughout the period of record using the Pruned Exact Linear Time (PELT) algorithm (Killick et al. 2012). The time series between these changepoints represent “price regimes” (i.e. time series between changepoints) which have generally similar mean oil price compared to the entire record. 
 
 Changepoint detection proceeds by minimizing a cost function over possible locations and number of changepoints. The cost function:
-
-
+$$\sum_{i=1}^{m+1}[C(y_{(\tau_{i-1}+1):\tau_i})]+\beta f(m) $$
+Where $m$ is the number of change points and their positions in the series at $\tau_{1:m}=(\tau_1,...,\tau_m)$, within a series $y_{1:n} = (y_1,...,y_n)$. $C$ is a cost function for a segement and $\beta f(m)$ is a penalty to increase the threshold to identify a changepoint, thereby preventing overfitting (Killick et al., 2012). Minimizing this calculation can be computationally demanding, hence the development of algorithms such as PELT, however for the oil price series this is not a practial constraint.   
 
 ```{r fig.cap="Changepoint analysis and resulting price regimes."}
 cpt.1 = cpt.mean(wti.ts, method="PELT", penalty = "Manual", pen.value = 5000, minseglen = 250)
@@ -200,19 +202,19 @@ regime.model <- lm(sd ~ med, data = price.regime.descriptive)
 ```
 
 
-
 ```{r, echo=FALSE}
 wti.regimes.ret <-  cbind(wti.regimes[30:nrow(wti.regimes),], wti.df$return) 
 colnames(wti.regimes.ret) <- c("close", "regime", "returns")
+```
+The change point analysis was performed with a minimum regime length of 250 trading days, approximately one calendar year. The cost value was set to 10,000. This parameterization resulted in `r length(wti.regimes.ret$close)`price regimes (i.e. $m+1$ change points). Then, within each regime the standard deviation (to indicate volatility) and median price were calculated. 
 
+```{r, strip.white = TRUE}
 flig.test <- fligner.test(x = wti.regimes.ret$returns, g = wti.regimes.ret$regime, na.action =  na.omit)
 print(flig.test)
-
-names(flig.test)
 ```
 The Fligner-Killeen test of homogeneity of variances determines if it is appropriate to reject the null hypothesis that the variances between each regime are the same. This test was chosen due to it's suitability for non-normal data. The chi-squared value of the test was `r flig.test$statistic %>% round(2)` and the p-value was `r flig.test$p.value %>% round(2)`, indicating it is appropriate to conclude the variances across the regimes are different. 
 
-Then, the standard deviation of the prices within a regime was compared to the median price of the regime. The resulting dataset describing the regimes were then modeled using linear regression. The resulting model indicates a slope of `r regime.model$coefficients[2] %>% round(2)`, meaning that for every dollar increase in the median price of a price regime, we expect an increase in the standard deviation of that regime of `r regime.model$coefficients[2] %>% round(2)`. This model has an adjusted r-squared value of 0.45. 
+The dataset describing the regimes were then modeled using linear regression. The resulting model indicates a slope of `r regime.model$coefficients[2] %>% round(2)`, meaning that for every dollar increase in the median price of a price regime, we expect an increase in the standard deviation of that regime of `r regime.model$coefficients[2] %>% round(2)`. This model has an adjusted r-squared value of 0.45. 
 
 ```{r}
 summary(regime.model) %>% tidy %>% kable(caption="Linear regression resulting from price as the predictor variable and regime variance as the response variable.")
@@ -228,7 +230,7 @@ abline(lm(sd ~ med, data = price.regime.descriptive), col = "red")
 
 Analyzing the residuals of this model indicate some problems with the fit. Namely, residuals are not evenly distributed and the model is subject to suspected leverage point observations. This is typical in linear models with small sample sizes. 
 
-```{r}
+```{r fig.cap="Residual Plots of the "}
 par(mfrow = c(1, 2))
 plot(regime.model, which = 1)
 plot(regime.model, which = 5)
@@ -236,14 +238,14 @@ plot(regime.model, which = 5)
 
 
 
-This section's analysis using changepoint analysis to break the oil price series into price regimes as defined by changes in the series mean is highly dependent upon model parameters. The PELT change point detection method identifies different regimes depending on the minimum segment length and penalty parameters, and based on the section of the time series used. An interactive Shiny App was created and may be access in order to try different parameterizations of the change point model and view the effects on the relationship between medial regime price and standard deviation within that regime.   
+This section's analysis using changepoint analysis to break the oil price series into price regimes as defined by changes in the series mean is highly dependent upon model parameters. The PELT change point detection method identifies different regimes depending on the minimum segment length and penalty parameters, and based on the section of the time series used. An interactive Shiny App was created and may be access in order to try different parameterizations of the change point model and view the effects on the relationship between medial regime price and standard deviation within that regime: (https://jhamski.shinyapps.io/oil_price_regimes_and_volatility/).   
 
 # Multivariate GARCH Model
 
-Generalized AutoRegressive Conditional Heteroskedasticity (GARCH) models attempt to model the variance component of a time series. It accounts for asymetric, clustered variance 
+Generalized AutoRegressive Conditional Heteroskedasticity (GARCH) models attempt to model the variance component of a time series. It accounts for asymetric, clustered time series variance and has successfully been applied to model oil prices (Salisu and Fasanya, 2012).  
 
-```{r, eval = F}
-wti.grch.1 <- wti.combined[,c(2,1)] %>% scale()
+```{r, eval = T, fig.cap="Condi"}
+wti.grch.1 <- wti.combined[,c(1,2)] %>% scale()
 
 
 gjrtspec <- ugarchspec(mean.model=list(armaOrder=c(1,1)), variance.model =list(model = "gjrGARCH"),distribution="std") 
@@ -254,7 +256,24 @@ dcc_spec = dccspec(uspec = multispec(replicate(2, gjrtspec)), distribution = "mv
 # Fit DCC
 garchdccfit = dccfit(dcc_spec, wti.grch.1, fit.control=list(scale=TRUE)) 
 
-garchdccfit
+plot(garchdccfit, which = 3)
+```
+  
+some text  
+
+```{r, eval = F}
+wti.grch.2 <- wti.combined[,c(1,5)] %>% scale()
+
+
+gjrtspec <- ugarchspec(mean.model=list(armaOrder=c(1,1)), variance.model =list(model = "gjrGARCH"),distribution="std") 
+
+# dcc specification - GARCH(1,1) for conditional correlations
+dcc_spec = dccspec(uspec = multispec(replicate(2, gjrtspec)), distribution = "mvt")
+
+# Fit DCC
+garchdccfit.2 = dccfit(dcc_spec, wti.grch.2, fit.control=list(scale=TRUE)) 
+
+plot(garchdccfit.2, which = 3)
 ```
 
 # Conclusion
@@ -262,15 +281,9 @@ garchdccfit
 This analysis suggests that the question "does oil price volatility scale with price?" requires further clarification to address. 
 
 *Expected Returns at a Given Price Level*
-It is apparent from the regression of unscaled returns to price level that we may expect returns to increase linearly with increasing price. The linear model indicates that for every one dollar increase in price, we may anticipate a 1.3 cent increase in expected returns. However, at  
+The regression of unscaled returns to price level indicates that we may expect returns to increase linearly with increasing price. The resulting linear model $R_t = 0.013P_t+0.14$ indicates that for every one dollar increase in price, we may anticipate a 1.3 cent increase in expected returns. However, with an $R^2$ value of `r summary(returns.unscaled)$r.squared %>% round(2)` the model does not explain most of the variation in the relationship between unscaled returns and base price.  
 
-$R_t = 0.013P_t+0.14$ 
-```{r}
-summary(returns.unscaled)
-```
-
-
-*Scaled Volatiily*
+*Volatility Within Price Regimes*
 
 
 # Acknowledgements   
@@ -278,6 +291,18 @@ summary(returns.unscaled)
 
 # Bibliography
 
-Ghalanos, Alexios (2015). rmgarch: Multivariate GARCH models. R package version 1.3-0.
+Ghalanos, Alexios, 2015. rmgarch: Multivariate GARCH models. R package version 1.3-0.
+
+Killick, R., Fearnhead, P. and Eckley, I.A., 2012. Optimal detection of changepoints with a linear computational cost. Journal of the American Statistical Association. 107(500), pp. 1590-1598
+
+Killick R, Haynes K and Eckley IA, 2016. changepoint: An R package for changepoint analysis. R
+package version 2.2.2, <URL: https://CRAN.R-project.org/package=changepoint>.
+
+Platts, 2010. The Structure of Global Oil Markets. Backgrounder marketing publication. 
 
 Thomas S. Y. Ho and Sang Bin Lee, 2004. The Oxford Guide to Financial Modeling: Applications for Capital Markets, Corporate Finance, Risk Management and Financial Institutions. ISBN: 9780195169621
+
+Salisu A.A., and Fasanya, Y.O., 2012. Comparative Performance of Volatility Models for Oil Price
+
+Vo, M.T., 2009. Regime-Switching Stochastic Volatility: Evidence from the Crude Oil Market.
+Energy Economics, 31, 779-788.

@@ -8,8 +8,10 @@
 #
 
 library(shiny)
-
+library(magrittr)
+library(xts)
 library(changepoint)
+library(dplyr)
 
 load("wti_project.Rda")
 
@@ -17,7 +19,7 @@ load("wti_project.Rda")
 ui <- fluidPage(
    
    # Application title
-   titlePanel("Changepoint Parameterization of Oil Price Regimes"),
+   titlePanel("Change Point Parameterization for Determining Oil Price Regimes"),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
@@ -30,13 +32,15 @@ ui <- fluidPage(
                      "Minimum Number of Days in Regime:",
                      min = 30,
                      max = 750,
-                     value = 250),
+                     value = 250, 
+                     step = 5),
          
          sliderInput("penalty",
                      "PELT Penalty:",
                      min = 0,
                      max = 20000,
-                     value = 10000)
+                     value = 10000,
+                     step = 100)
       ),
       
       # Show a plot of the generated distribution
@@ -64,7 +68,7 @@ server <- function(input, output) {
                      pen.value = input$penalty, 
                      minseglen = input$minseg)
      
-     plot(cpt, cpt.width = 5)
+     plot(cpt, cpt.width = 5, main = "Change Points Indicated by the Price Series Mean", ylab = "Price ($/barrel)")
    })
    
    
@@ -98,7 +102,9 @@ server <- function(input, output) {
        group_by(regime) %>% 
        summarize(med = median(close), sd = sd(close))
      
-     plot(x = price.regime.descriptive$med, y = price.regime.descriptive$sd, type = "p")
+     plot(x = price.regime.descriptive$med, y = price.regime.descriptive$sd, type = "p",
+          ylab = "Standard Deviation of Regime Price Series", xlab = "Median Price within a Regime ($/barrel)",
+          main = "Relationship between Price Regime Level and Volatility")
      abline(lm(sd ~ med, data = price.regime.descriptive), col = "red")
      
    })
