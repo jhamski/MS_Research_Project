@@ -388,10 +388,10 @@ the p-value was less than 2.2e-16, indicating it is appropriate to
 conclude the variances across the regimes are different.
 
 The data set describing the regimes were then modeled using linear
-regression. The resulting model indicates a slope of 0.08, meaning that
-for every dollar increase in the median price of a price regime, we
-expect an increase in the standard deviation of that regime of 0.08.
-This model has an adjusted r-squared value of 0.45.
+regression (Figure 6). The resulting model indicates a slope of 0.08,
+meaning that for every dollar increase in the median price of a price
+regime, we expect an increase in the standard deviation of that regime
+of 0.08. This model has an adjusted r-squared value of 0.45.
 
 \begin{longtable}[]{@{}lrrrr@{}}
 \caption{Linear regression resulting from price as the predictor
@@ -418,9 +418,9 @@ the regime to standard deviation within that price regime.}
 \end{figure}
 
 Analyzing the residuals of this model indicate some problems with the
-fit. Namely, residuals are not evenly distributed and the model is
-subject to suspected leverage point observations. This is typical in
-linear models with small sample sizes.
+fit (Figure 7). Namely, residuals are not evenly distributed and the
+model is subject to suspected leverage point observations. This is
+typical in linear models with small sample sizes.
 
 \begin{figure}[htbp]
 \centering
@@ -460,12 +460,33 @@ the series at one time step before the time the correlation is
 calculated. Essentially, DCC is looking for ``contemporaneous
 correlation'' in the variance of two series.
 
-A DCC model was constructed from an ARMA(1,1) and
-Glosten-Jagannathan-Runkle GARCH model. This means that we specified
-a.\\
-\includegraphics{Figs/unnamed-chunk-19-1.pdf}
+This study is attempting a multivariate GARCH model using a return
+series, which is derived from the price series, and the price series
+itself. While using a derivative of a series is common in time series
+analysis (i.e.~autoregressive models), this doe snot appear to be a
+common
 
-some text
+A DCC model was constructed from an ARMA(1,1) and
+Glosten-Jagannathan-Runkle GARCH model. This means that we specified a
+base model for the conditional mean using an
+autoregressive--moving-average (ARMA) model with an autoregressive term
+of one and a moving average term of on. Note that the same terms used in
+Narayan and Narayan, 2007, an ARMA(12,12) model, were used. However all
+models built failed to converge. This may indicate that there is a
+problem with linear combinations resulting from building a model with
+price level and volatility.
+
+The resulting conditional covariance chart (Figure 8) shows that during
+times of high volatility, the price level and returns have covariance
+values as high as 0.4 and 0.55. However, in general the value is less
+than 0.1. This result does not lead to a clear conclusion and the
+methodology laid out in this section requires more work.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{Figs/unnamed-chunk-19-1.pdf}
+\caption{Dynamic Conditional Correlation between Price and Returns}
+\end{figure}
 
 \section{Conclusion}\label{conclusion}
 
@@ -482,14 +503,24 @@ returns. However, with an \(R^2\) value of 0.19 the model does not
 explain most of the variation in the relationship between unscaled
 returns and base price.
 
-\emph{Volatility Within Price Regimes}
+\emph{Volatility Within Price Regimes}\\
+Detecting change points, breaking the price series into regimes, and
+comparing the standard deviation within those regimes provides the
+clearest evidence that we may expect higher volatility at higher prices.
+This method has the benefit of capturing volatility clustering and is
+less suseptable to imbalance due to the high kurtosis of the return
+series. Based on this method, we may expect the standard deviation of
+our returns (i.e.~volatility within a price regime) to increase by 0.8
+cents for every one dollar increase in that regime's median price.
 
 \emph{Multivariate GARCH Models using Price Level, Returns, and
 Volatility}
 
 The method of using DCC models to investigate the relationship between
 oil price and volatility requires further exploration and theory
-development.
+development. It is not clear that the method of modeling volatility
+using a GARCH model will allow us to determine if price level is a an
+explanatory factor of volatility.
 
 \section{Acknowledgements}\label{acknowledgements}
 
